@@ -237,7 +237,3 @@ Open **`http://127.0.0.1:5000`** in your browser to access QuizVerse.
 - **[Security & Compliance Guide](docs/SECURITY_GUIDE.md)**: ProxyFix, proctoring telemetry, IDOR, and CSRF protections.
 - **[Backup & Disaster Recovery Guide](docs/BACKUP_AND_RECOVERY.md)**: Online hot backups, tier-isolated retention, restore drill.
 - **[API Reference](docs/API_REFERENCE.md)**: JSON endpoints for exams, proctoring, AI tutoring, and diagnostics.
-
-
-#   o n l i n e _ q u i z _ s y s t e m  
- 
