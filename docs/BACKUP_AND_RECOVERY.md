@@ -65,3 +65,4 @@ Enable timer:
 sudo systemctl daemon-reload
 sudo systemctl enable --now quizverse-backup.timer
 ```
+

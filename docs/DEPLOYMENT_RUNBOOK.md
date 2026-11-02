@@ -162,3 +162,4 @@ sudo -u quizverse venv/bin/python database/backup_db.py restore /var/lib/quizver
 # 3. Restart service
 sudo systemctl start quizverse
 ```
+

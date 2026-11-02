@@ -63,3 +63,4 @@ QuizVerse/
 3. **Insecure Direct Object Reference (IDOR) Mitigation:** Result exports enforce strict ownership checks (`attempt.user_id == session.user_id` or admin role).
 4. **CSRF Protection:** State-modifying requests require valid `_csrf_token` in form data or `X-CSRFToken` in AJAX headers.
 5. **CSV Formula Injection Sanitization:** Spreadsheet formula characters (`=`, `+`, `-`, `@`) are prepended with single quotes `'` during exports.
+

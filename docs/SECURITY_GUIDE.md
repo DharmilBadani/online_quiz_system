@@ -18,3 +18,4 @@ QuizVerse incorporates defensive engineering patterns aligned with OWASP Top 10 
 
 > [!WARNING]
 > **Proctoring Scope:** The built-in proctoring subsystem monitors client-side browser blur, fullscreen exit, and tab switching events. It cannot detect external hardware monitors, virtual machines, physical books, or mobile devices. For high-stakes institutional examinations, physical proctors or dedicated lockdown browsers are advised.
+

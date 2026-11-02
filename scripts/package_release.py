@@ -84,3 +84,4 @@ def build_package(zip_name="QuizVerse_v2.0.0_Clean_Release.zip"):
 if __name__ == "__main__":
     pkg_name = sys.argv[1] if len(sys.argv) > 1 else "QuizVerse_v2.0.0_Clean_Release.zip"
     build_package(pkg_name)
+
