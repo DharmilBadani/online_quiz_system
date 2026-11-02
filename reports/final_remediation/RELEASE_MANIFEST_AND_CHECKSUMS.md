@@ -1,10 +1,11 @@
 # RELEASE MANIFEST & INTEGRITY CHECKSUMS — QUIZVERSE v2.0.0
 **Product:** QuizVerse Institutional Online Examination Platform  
 **Release Tag:** `v2.0.0-institutional-prod`  
-**Git Commit SHA:** `f0620296eb32db5d40651111f9dd91150d284c7b`  
+**Git Commit SHA:** `26c7f94afb15f5a6e27f5520934b63a3ff8e2388`  
 **Build Date:** November 2, 2026  
 **Architecture:** Python 3.12 / Flask 3.0+ / SQLite3 WAL / Jinja2 / Vanilla JS  
 **Target Release Archive:** `dist/QuizVerse_v2.0.0_Clean_Release.zip`  
+**Archive SHA-256:** `5d95ddab5fa06bc699fc52980502fed77ea4310dd0e7cb9a3481824119ca81fa`  
 
 ---
 
