@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard & Top Rankings - Online Quiz System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11 col-xl-10">
+        
+        <!-- Leaderboard Header Banner -->
+        <div class="hero-card mb-4 text-center">
+            <div class="d-inline-flex p-3 rounded-circle mb-3" style="background: rgba(245, 158, 11, 0.15); border: 2px solid rgba(245, 158, 11, 0.4);">
+                <i class="bi bi-trophy-fill fs-1 text-warning"></i>
+            </div>
+            <h1 class="display-5 fw-bold mb-2">Quiz Leaderboard & Hall of Fame</h1>
+            <p class="lead opacity-90 mb-3 mx-auto" style="max-width: 620px;">
+                Verified performance records persistent in SQLite. Ranked automatically by highest score, accuracy, and lightning completion speed.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('index') }}" class="btn btn-warning btn-lg px-4 py-2 rounded-pill fw-bold text-dark shadow">
+                    <i class="bi bi-play-circle-fill me-1"></i> Start New Quiz Attempt
+                </a>
+            </div>
+        </div>
+
+        {% if attempts and attempts|length >= 1 %}
+        <!-- Top 3 Champions Podium Display -->
+        <div class="mb-5">
+            <div class="text-center mb-3">
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning px-3 py-1 rounded-pill small fw-bold">
+                    <i class="bi bi-stars me-1"></i> TOP PERFORMERS
+                </span>
+                <h3 class="fw-bold mt-2 mb-0">The Champions Podium</h3>
+            </div>
+
+            <div class="podium-wrapper">
+                <!-- 2nd Place: Silver (Left) -->
+                {% if attempts|length >= 2 %}
+                <div class="podium-col podium-col-2">
+                    <div class="podium-card text-center">
+                        <div class="podium-badge-silver rounded-circle mx-auto d-flex align-items-center justify-content-center mb-2 shadow" style="width: 50px; height: 50px; font-size: 1.4rem;">
+                            🥈
+                        </div>
+                        <h6 class="fw-bold text-truncate mb-1" style="color: var(--text-primary);">{{ attempts[1]['candidate_name'] }}</h6>
+                        <span class="badge bg-secondary-subtle text-secondary font-mono px-2 py-1 rounded-pill small mb-2 d-inline-block">
+                            Rank #2
+                        </span>
+                        <div class="fs-5 fw-bold text-primary font-mono mb-1">{{ attempts[1]['percentage'] }}%</div>
+                        <div class="small text-muted mb-2">{{ attempts[1]['score'] }} / {{ attempts[1]['total_questions'] }} Correct</div>
+                        <div class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 rounded-pill small text-truncate" style="max-width: 100%;">
+                            {{ attempts[1]['category'] }}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="podium-col podium-col-2">
+                    <div class="podium-card podium-placeholder text-center py-4">
+                        <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center mb-2 border border-secondary" style="width: 44px; height: 44px; font-size: 1.1rem; opacity: 0.6;">
+                            🥈
+                        </div>
+                        <span class="badge bg-secondary-subtle text-secondary font-mono px-2 py-1 rounded-pill small mb-1 d-inline-block">
+                            Rank #2 Open
+                        </span>
+                        <p class="small text-muted mb-0 mt-1">Claim Silver!</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- 1st Place: Gold (Center Elevated) -->
+                <div class="podium-col podium-col-1">
+                    <div class="podium-card text-center">
+                        <div class="podium-badge-gold rounded-circle mx-auto d-flex align-items-center justify-content-center mb-2 shadow-lg" style="width: 64px; height: 64px; font-size: 1.8rem;">
+                            🥇
+                        </div>
+                        <div class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill mb-1">CHAMPION</div>
+                        <h5 class="fw-bold text-truncate mb-1" style="color: var(--text-primary);">{{ attempts[0]['candidate_name'] }}</h5>
+                        <div class="fs-4 fw-bold text-warning font-mono mb-1">{{ attempts[0]['percentage'] }}%</div>
+                        <div class="small text-muted mb-2">{{ attempts[0]['score'] }} / {{ attempts[0]['total_questions'] }} Correct</div>
+                        <div class="badge bg-primary px-3 py-1 rounded-pill small text-truncate" style="max-width: 100%;">
+                            {{ attempts[0]['category'] }} &bull; {{ attempts[0].get('topic') or 'All Topics' }}
+                        </div>
+                        <div class="mt-2 small text-muted font-mono">
+                            <i class="bi bi-stopwatch text-danger"></i> {{ attempts[0]['formatted_time'] }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3rd Place: Bronze (Right) -->
+                {% if attempts|length >= 3 %}
+                <div class="podium-col podium-col-3">
+                    <div class="podium-card text-center">
+                        <div class="podium-badge-bronze rounded-circle mx-auto d-flex align-items-center justify-content-center mb-2 shadow" style="width: 50px; height: 50px; font-size: 1.4rem;">
+                            🥉
+                        </div>
+                        <h6 class="fw-bold text-truncate mb-1" style="color: var(--text-primary);">{{ attempts[2]['candidate_name'] }}</h6>
+                        <span class="badge bg-warning-subtle text-warning-emphasis font-mono px-2 py-1 rounded-pill small mb-2 d-inline-block">
+                            Rank #3
+                        </span>
+                        <div class="fs-5 fw-bold text-primary font-mono mb-1">{{ attempts[2]['percentage'] }}%</div>
+                        <div class="small text-muted mb-2">{{ attempts[2]['score'] }} / {{ attempts[2]['total_questions'] }} Correct</div>
+                        <div class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 rounded-pill small text-truncate" style="max-width: 100%;">
+                            {{ attempts[2]['category'] }}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="podium-col podium-col-3">
+                    <div class="podium-card podium-placeholder text-center py-4">
+                        <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center mb-2 border border-secondary" style="width: 44px; height: 44px; font-size: 1.1rem; opacity: 0.6;">
+                            🥉
+                        </div>
+                        <span class="badge bg-secondary-subtle text-secondary font-mono px-2 py-1 rounded-pill small mb-1 d-inline-block">
+                            Rank #3 Open
+                        </span>
+                        <p class="small text-muted mb-0 mt-1">Claim Bronze!</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Subject Filter Tabs & Live Search -->
+        <div class="quiz-card p-3 mb-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="text-muted small fw-bold text-uppercase d-flex align-items-center">
+                        <i class="bi bi-funnel-fill text-primary me-2"></i> Filter:
+                    </span>
+                    <div class="d-flex flex-wrap gap-1">
+                        <a href="{{ url_for('leaderboard', category='All') }}" 
+                           class="filter-btn {% if active_filter == 'All' %}active{% endif %}">
+                            All Subjects
+                        </a>
+                        {% for subj_key, subj in subject_catalog.items() %}
+                        <a href="{{ url_for('leaderboard', category=subj_key) }}" 
+                           class="filter-btn {% if active_filter == subj_key %}active{% endif %}">
+                            {{ subj_key }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Instant Live Search inside table -->
+                <div class="input-group input-group-sm" style="max-width: 260px;">
+                    <span class="input-group-text bg-transparent border-secondary border-opacity-25 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="leaderboardSearchInput" class="form-control bg-transparent border-secondary border-opacity-25 text-white" 
+                           placeholder="Search candidate / topic..." oninput="filterLeaderboardTable()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Table Card -->
+        <div class="quiz-card p-4 mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0">
+                    <i class="bi bi-award-fill text-warning me-2"></i>
+                    {% if active_filter != 'All' %}{{ active_filter }} Rankings{% else %}Top Scores (All Subjects){% endif %}
+                </h4>
+                <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill small font-mono" id="recordCountBadge">
+                    {{ attempts|length }} Records
+                </span>
+            </div>
+
+            {% if attempts %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="leaderboardTable">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--card-border);">
+                                <th scope="col" style="width: 75px;" class="text-center">Rank</th>
+                                <th scope="col">Candidate Name</th>
+                                <th scope="col">Subject</th>
+                                <th scope="col">Sub-Topic</th>
+                                <th scope="col" class="text-center">Score</th>
+                                <th scope="col" style="width: 140px;">Percentage</th>
+                                <th scope="col" class="text-center">Grade</th>
+                                <th scope="col" class="text-center">Time Taken</th>
+                                <th scope="col" class="text-center">Speed</th>
+                                <th scope="col" class="text-end">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for att in attempts %}
+                                <tr class="leaderboard-row" data-search="{{ att['candidate_name']|lower }} {{ att['category']|lower }} {{ (att.get('topic') or '')|lower }}">
+                                    <!-- Rank with medals for top 3 -->
+                                    <td class="text-center fw-bold">
+                                        {% if loop.index == 1 %}
+                                            <span class="badge bg-warning text-dark px-2 py-1 rounded-circle fs-6">🥇 1</span>
+                                        {% elif loop.index == 2 %}
+                                            <span class="badge bg-secondary text-white px-2 py-1 rounded-circle fs-6">🥈 2</span>
+                                        {% elif loop.index == 3 %}
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning px-2 py-1 rounded-circle fs-6">🥉 3</span>
+                                        {% else %}
+                                            <span class="text-muted font-mono">#{{ loop.index }}</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Candidate Name -->
+                                    <td class="fw-bold" style="color: var(--text-primary);">
+                                        <i class="bi bi-person-circle text-primary me-2"></i>{{ att['candidate_name'] }}
+                                    </td>
+
+                                    <!-- Subject Badge -->
+                                    <td>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill small">
+                                            {{ att['category'] }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Sub-Topic -->
+                                    <td>
+                                        <span class="small text-muted fw-semibold">
+                                            {{ att.get('topic') or 'All Topics' }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Score -->
+                                    <td class="text-center fw-bold font-mono">
+                                        {{ att['score'] }} <span class="text-muted small fw-normal">/ {{ att['total_questions'] }}</span>
+                                    </td>
+
+                                    <!-- Percentage with Progress Bar -->
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.08);">
+                                                <div class="progress-bar {% if att['percentage'] >= 70 %}bg-success{% elif att['percentage'] >= 50 %}bg-primary{% else %}bg-danger{% endif %}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ att['percentage'] }}%;"></div>
+                                            </div>
+                                            <span class="font-mono small fw-bold" style="min-width: 36px; text-align: right;">{{ att['percentage'] }}%</span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Grade -->
+                                    <td class="text-center">
+                                        <span class="badge {% if att['grade'] in ['A+', 'A'] %}bg-success{% elif att['grade'] == 'B' %}bg-primary{% elif att['grade'] == 'C' %}bg-warning text-dark{% else %}bg-danger{% endif %} px-2 py-1 rounded-pill font-mono">
+                                            {{ att['grade'] }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Time Taken -->
+                                    <td class="text-center fw-semibold text-muted font-mono small">
+                                        <i class="bi bi-stopwatch me-1 text-danger"></i>{{ att['formatted_time'] }}
+                                    </td>
+
+                                    <!-- Speed Rating -->
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border px-2 py-1 rounded-pill small">
+                                            {{ att['speed_rating'] or 'Standard' }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Date -->
+                                    <td class="text-end text-muted small">
+                                        {{ att['formatted_date'] }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty search results notice -->
+                <div id="noLeaderboardMatch" class="text-center py-4 text-muted" style="display: none;">
+                    <i class="bi bi-search fs-2 mb-2 d-block"></i>
+                    No candidates or topics match your search query.
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox text-muted fs-1 mb-2"></i>
+                    <h5 class="fw-bold text-muted">No Attempts Recorded Yet</h5>
+                    <p class="text-muted small mb-3">Be the first candidate to take a quiz in this subject!</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-sm px-4 rounded-pill">
+                        Launch a Quiz
+                    </a>
+                </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function filterLeaderboardTable() {
+        const query = (document.getElementById('leaderboardSearchInput')?.value || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.leaderboard-row');
+        let visible = 0;
+
+        rows.forEach(row => {
+            const data = row.getAttribute('data-search') || '';
+            if (!query || data.includes(query)) {
+                row.style.display = '';
+                visible++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const noMatch = document.getElementById('noLeaderboardMatch');
+        if (noMatch) {
+            noMatch.style.display = (visible === 0 && rows.length > 0) ? 'block' : 'none';
+        }
+
+        const countBadge = document.getElementById('recordCountBadge');
+        if (countBadge) {
+            countBadge.textContent = visible + ' Records';
+        }
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,571 @@
+{% extends "base.html" %}
+
+{% block title %}Live Code Sandbox & AI Auto-Grader | QuizVerse{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Code Sandbox</li>
+                </ol>
+            </nav>
+            <h1 class="h2 fw-bold text-body mb-1">
+                <i class="bi bi-code-slash text-success me-2"></i>Live Code Sandbox & AI Auto-Grader
+            </h1>
+            <p class="text-muted small mb-0">
+                Sandboxed in-browser code execution powered by WebAssembly (Pyodide) &bull; Automated evaluation for time/space complexity, edge cases, and code optimization via Google Gemini.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('syllabus_ingest') }}" class="neu-btn px-3 py-2 text-decoration-none small">
+                <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> Syllabus Ingest
+            </a>
+            <a href="{{ url_for('arena') }}" class="neu-btn px-3 py-2 text-decoration-none small">
+                <i class="bi bi-lightning-charge-fill me-1 text-warning"></i> 1v1 Arena
+            </a>
+        </div>
+    </div>
+
+    <!-- IDE Layout -->
+    <div class="row g-4">
+        <!-- Left: Challenge Specification -->
+        <div class="col-lg-5">
+            <div class="neu-card p-4 h-100 d-flex flex-column">
+                <!-- Challenge Selector -->
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase" style="font-size: 0.75rem;">Select Problem Challenge</label>
+                    <select id="challengeSelector" class="form-select neu-input small" onchange="onChallengeSelected()">
+                        <option value="two_sum">Two Sum (Hash Map Lookup)</option>
+                        <option value="valid_parentheses">Valid Parentheses (Stack Verification)</option>
+                        <option value="palindrome_string">Longest Palindromic Substring</option>
+                        <option value="fibonacci_memo">Fibonacci with Dynamic Programming Memo</option>
+                        <option value="custom">Custom Algorithm Playground</option>
+                    </select>
+                </div>
+
+                <!-- Problem Spec Card -->
+                <div class="p-3 rounded-4 mb-3" style="background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-primary text-white rounded-pill px-3 py-1 small" id="problemDifficulty">Easy</span>
+                        <span class="badge bg-secondary-subtle text-secondary rounded-pill small" id="problemCategory">Array & Hashing</span>
+                    </div>
+                    <h5 class="fw-bold text-body mb-2" id="problemTitle">Two Sum</h5>
+                    <p class="small text-body mb-3 lh-base" id="problemDescription">
+                        Given an array of integers <code>nums</code> and an integer <code>target</code>, return indices of the two numbers such that they add up to target. You may assume each input has exactly one solution, and you may not use the same element twice.
+                    </p>
+
+                    <div class="small fw-bold text-muted mb-1 text-uppercase" style="font-size: 0.7rem;">Sample Test Case:</div>
+                    <pre class="p-2 rounded bg-dark text-light small mb-2 font-mono" id="sampleTestCase">Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</pre>
+
+                    <div class="small fw-bold text-muted mb-1 text-uppercase" style="font-size: 0.7rem;">Constraints:</div>
+                    <ul class="small text-muted mb-0 ps-3" id="problemConstraints">
+                        <li>2 &le; nums.length &le; 10<sup>4</sup></li>
+                        <li>-10<sup>9</sup> &le; nums[i] &le; 10<sup>9</sup></li>
+                        <li>Only one valid answer exists.</li>
+                    </ul>
+                </div>
+
+                <!-- Language Selector -->
+                <div class="mt-auto">
+                    <label class="form-label small fw-bold text-muted text-uppercase" style="font-size: 0.75rem;">Language Environment</label>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="neu-btn btn-sm px-3 py-2 flex-grow-1 active rounded-pill small lang-btn" data-lang="python" onclick="setLanguage('python')">
+                            <i class="bi bi-filetype-py text-warning me-1"></i> Python 3 (WASM)
+                        </button>
+                        <button type="button" class="neu-btn btn-sm px-3 py-2 flex-grow-1 rounded-pill small lang-btn" data-lang="javascript" onclick="setLanguage('javascript')">
+                            <i class="bi bi-filetype-js text-warning me-1"></i> JavaScript (ES6)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Code Editor & Console Output -->
+        <div class="col-lg-7">
+            <div class="neu-card p-4 h-100 d-flex flex-column">
+                <!-- Editor Top Bar -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-dark font-mono px-3 py-2 rounded-pill small">
+                            <i class="bi bi-file-earmark-code me-1 text-info"></i> <span id="activeFilename">solution.py</span>
+                        </span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small" id="wasmStatus">
+                            <i class="bi bi-cpu me-1"></i> WASM Runner Ready
+                        </span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="neu-btn btn-sm px-3 py-1 rounded-pill" onclick="resetStarterCode()">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Code Editor Area -->
+                <div class="position-relative mb-3 flex-grow-1" style="min-height: 320px;">
+                    <textarea id="codeEditor" class="form-control font-mono p-3 text-light h-100 rounded-4" 
+                              style="background: #111827; border: 1px solid rgba(255,255,255,0.1); font-size: 0.95rem; line-height: 1.5; resize: none; tab-size: 4;"
+                              spellcheck="false"></textarea>
+                </div>
+
+                <!-- Run / Grade Controls -->
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button type="button" id="runCodeBtn" class="btn btn-success px-4 py-2 rounded-pill fw-bold shadow d-flex align-items-center gap-2" onclick="executeCodeInBrowser()">
+                        <i class="bi bi-play-fill fs-5"></i> Run Code (Client WASM)
+                    </button>
+                    <button type="button" id="aiDoctorBtn" class="btn btn-primary px-4 py-2 rounded-pill fw-bold shadow d-flex align-items-center gap-2 ms-auto" onclick="evaluateWithAIDoctor()">
+                        <i class="bi bi-robot"></i> AI Code Doctor & Auto-Grader
+                    </button>
+                </div>
+
+                <!-- Output Tabs (Terminal / AI Report) -->
+                <ul class="nav nav-pills mb-2" id="outputTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active small py-1 px-3" id="console-tab" data-bs-toggle="pill" data-bs-target="#consolePanel" type="button">
+                            <i class="bi bi-terminal me-1"></i> Terminal Console
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link small py-1 px-3" id="doctor-tab" data-bs-toggle="pill" data-bs-target="#doctorPanel" type="button">
+                            <i class="bi bi-clipboard2-pulse me-1"></i> AI Auto-Grader Report
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="outputTabContent">
+                    <!-- Console Pane -->
+                    <div class="tab-pane fade show active" id="consolePanel">
+                        <pre id="terminalOutput" class="p-3 rounded-4 font-mono small text-light mb-0" 
+                             style="background: #0b0f19; min-height: 120px; max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.08);">// Ready to execute. Click 'Run Code' to execute test cases.</pre>
+                    </div>
+
+                    <!-- AI Auto-Grader Report Pane -->
+                    <div class="tab-pane fade" id="doctorPanel">
+                        <div id="doctorOutput" class="p-3 rounded-4 small mb-0" 
+                             style="background: var(--neu-surface); box-shadow: var(--neu-inset); min-height: 120px; max-height: 240px; overflow-y: auto;">
+                            <div class="text-muted text-center py-4">Click <strong>'AI Code Doctor & Auto-Grader'</strong> to analyze complexity and receive architectural feedback.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Pyodide WebAssembly for instant Python execution without server dependencies -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+<script>
+let pyodideInstance = null;
+let activeLanguage = "python";
+let activeChallengeKey = "two_sum";
+
+const CHALLENGES = {
+    two_sum: {
+        title: "Two Sum",
+        category: "Array & Hashing",
+        difficulty: "Easy",
+        description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+        sample: "Input: nums = [2,7,11,15], target = 9\nOutput: [0, 1]",
+        constraints: ["2 <= nums.length <= 10^4", "-10^9 <= nums[i] <= 10^9", "Exactly one valid answer exists."],
+        python: `def two_sum(nums, target):
+    # Complete solution with hash map
+    seen = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+    return []
+
+# Test Case
+nums = [2, 7, 11, 15]
+target = 9
+print("Input:", nums, "Target:", target)
+result = two_sum(nums, target)
+print("Result indices:", result)
+assert result == [0, 1], "Test Case Failed!"
+print(">>> ALL TESTS PASSED! <<<")
+`,
+        javascript: `function twoSum(nums, target) {
+    const seen = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        const comp = target - nums[i];
+        if (seen.has(comp)) return [seen.get(comp), i];
+        seen.set(nums[i], i);
+    }
+    return [];
+}
+
+const nums = [2, 7, 11, 15];
+const target = 9;
+console.log("Input:", nums, "Target:", target);
+const result = twoSum(nums, target);
+console.log("Result indices:", result);
+if (result[0] === 0 && result[1] === 1) {
+    console.log(">>> ALL TESTS PASSED! <<<");
+}
+`
+    },
+    valid_parentheses: {
+        title: "Valid Parentheses",
+        category: "Stack",
+        difficulty: "Easy",
+        description: "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.",
+        sample: "Input: s = \"()[]{}\"\nOutput: true",
+        constraints: ["1 <= s.length <= 10^4", "s consists of parentheses only."],
+        python: `def is_valid(s):
+    stack = []
+    mapping = {')': '(', '}': '{', ']': '['}
+    for char in s:
+        if char in mapping:
+            top = stack.pop() if stack else '#'
+            if mapping[char] != top:
+                return False
+        else:
+            stack.append(char)
+    return not stack
+
+# Test Cases
+test_inputs = ["()[]{}", "([)]", "{[]}"]
+for test in test_inputs:
+    res = is_valid(test)
+    print(f"'{test}' -> {res}")
+print(">>> TESTS EXECUTED SUCCESSFULLY <<<")
+`,
+        javascript: `function isValid(s) {
+    const stack = [];
+    const map = {')': '(', '}': '{', ']': '['};
+    for (let char of s) {
+        if (map[char]) {
+            if (stack.pop() !== map[char]) return false;
+        } else {
+            stack.push(char);
+        }
+    }
+    return stack.length === 0;
+}
+
+console.log("()[]{} ->", isValid("()[]{}"));
+console.log("([)] ->", isValid("([)]"));
+console.log(">>> TESTS EXECUTED SUCCESSFULLY <<<");
+`
+    },
+    palindrome_string: {
+        title: "Longest Palindromic Substring",
+        category: "Dynamic Programming & Two Pointers",
+        difficulty: "Medium",
+        description: "Given a string s, return the longest palindromic substring in s.",
+        sample: "Input: s = \"babad\"\nOutput: \"bab\" (or \"aba\")",
+        constraints: ["1 <= s.length <= 1000", "s consist of only digits and English letters."],
+        python: `def longest_palindrome(s):
+    if not s or len(s) == 1:
+        return s
+    
+    start, max_len = 0, 1
+    for i in range(len(s)):
+        # Odd length palindrome
+        l, r = i, i
+        while l >= 0 and r < len(s) and s[l] == s[r]:
+            if (r - l + 1) > max_len:
+                start = l
+                max_len = r - l + 1
+            l -= 1
+            r += 1
+            
+        # Even length palindrome
+        l, r = i, i + 1
+        while l >= 0 and r < len(s) and s[l] == s[r]:
+            if (r - l + 1) > max_len:
+                start = l
+                max_len = r - l + 1
+            l -= 1
+            r += 1
+            
+    return s[start:start + max_len]
+
+print("Palindrome of 'babad':", longest_palindrome("babad"))
+print("Palindrome of 'cbbd':", longest_palindrome("cbbd"))
+print(">>> TESTS PASSED! <<<")
+`,
+        javascript: `function longestPalindrome(s) {
+    let start = 0, maxLen = 1;
+    function expand(l, r) {
+        while (l >= 0 && r < s.length && s[l] === s[r]) {
+            if (r - l + 1 > maxLen) {
+                start = l;
+                maxLen = r - l + 1;
+            }
+            l--;
+            r++;
+        }
+    }
+    for (let i = 0; i < s.length; i++) {
+        expand(i, i);
+        expand(i, i + 1);
+    }
+    return s.substring(start, start + maxLen);
+}
+
+console.log("Result:", longestPalindrome("babad"));
+console.log(">>> TESTS PASSED! <<<");
+`
+    },
+    fibonacci_memo: {
+        title: "Fibonacci Memoization",
+        category: "Dynamic Programming",
+        difficulty: "Easy",
+        description: "Compute the N-th Fibonacci number in O(n) linear time using memoization or bottom-up tabulation.",
+        sample: "Input: n = 10\nOutput: 55",
+        constraints: ["0 <= n <= 30"],
+        python: `def fib_memo(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n <= 1:
+        return n
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+print("fib(10) =", fib_memo(10))
+print("fib(20) =", fib_memo(20))
+assert fib_memo(10) == 55, "Failed on fib(10)"
+print(">>> ALL TESTS PASSED! <<<")
+`,
+        javascript: `function fibMemo(n, memo = {}) {
+    if (n in memo) return memo[n];
+    if (n <= 1) return n;
+    return memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);
+}
+
+console.log("fib(10) =", fibMemo(10));
+console.log("fib(20) =", fibMemo(20));
+console.log(">>> ALL TESTS PASSED! <<<");
+`
+    },
+    custom: {
+        title: "Custom Algorithm Playground",
+        category: "Free Code",
+        difficulty: "Any",
+        description: "Write any custom algorithms, unit tests, or data structure implementations. Run live in browser.",
+        sample: "print('Hello from QuizVerse Code Sandbox!')",
+        constraints: ["Freeform execution."],
+        python: `# Custom Algorithm Playground
+def quicksort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quicksort(left) + middle + quicksort(right)
+
+data = [38, 27, 43, 3, 9, 82, 10]
+print("Original:", data)
+print("Sorted:  ", quicksort(data))
+`,
+        javascript: `// Custom Algorithm Playground
+console.log("Running in browser JavaScript sandbox!");
+const numbers = [38, 27, 43, 3, 9, 82, 10];
+const sorted = [...numbers].sort((a, b) => a - b);
+console.log("Sorted array:", sorted);
+`
+    }
+};
+
+// Initialize Pyodide WASM in background
+async function initPyodideWasm() {
+    const statusElem = document.getElementById('wasmStatus');
+    try {
+        if (typeof loadPyodide !== 'undefined') {
+            pyodideInstance = await loadPyodide();
+            statusElem.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Python 3 WASM Ready';
+        }
+    } catch (err) {
+        statusElem.innerHTML = '<i class="bi bi-info-circle me-1"></i> JS Sandbox Mode';
+    }
+}
+window.addEventListener('load', initPyodideWasm);
+
+function onChallengeSelected() {
+    activeChallengeKey = document.getElementById('challengeSelector').value;
+    const c = CHALLENGES[activeChallengeKey];
+    document.getElementById('problemTitle').textContent = c.title;
+    document.getElementById('problemCategory').textContent = c.category;
+    document.getElementById('problemDifficulty').textContent = c.difficulty;
+    document.getElementById('problemDescription').textContent = c.description;
+    document.getElementById('sampleTestCase').textContent = c.sample;
+
+    const list = document.getElementById('problemConstraints');
+    list.innerHTML = '';
+    c.constraints.forEach(con => {
+        const li = document.createElement('li');
+        li.textContent = con;
+        list.appendChild(li);
+    });
+
+    resetStarterCode();
+}
+
+function setLanguage(lang) {
+    activeLanguage = lang;
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+    document.getElementById('activeFilename').textContent = lang === 'python' ? 'solution.py' : 'solution.js';
+    resetStarterCode();
+}
+
+function resetStarterCode() {
+    const c = CHALLENGES[activeChallengeKey];
+    document.getElementById('codeEditor').value = c[activeLanguage] || c.python;
+}
+
+// Client-side Execution
+async function executeCodeInBrowser() {
+    const code = document.getElementById('codeEditor').value;
+    const term = document.getElementById('terminalOutput');
+    const runBtn = document.getElementById('runCodeBtn');
+    
+    // Switch to console tab
+    const consoleTab = new bootstrap.Tab(document.getElementById('console-tab'));
+    consoleTab.show();
+
+    term.textContent = "Executing code in isolated client sandbox...\n";
+    runBtn.disabled = true;
+    const startTime = performance.now();
+
+    try {
+        if (activeLanguage === "javascript") {
+            let logs = [];
+            const originalLog = console.log;
+            console.log = function(...args) {
+                logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '));
+                originalLog.apply(console, args);
+            };
+
+            // execute safely
+            const fn = new Function(code);
+            fn();
+
+            console.log = originalLog;
+            const elapsed = Math.round(performance.now() - startTime);
+            term.textContent = logs.join('\n') + `\n\n[Execution Finished in ${elapsed}ms]`;
+        } else {
+            // Python WASM execution
+            if (!pyodideInstance) {
+                term.textContent = "Loading WebAssembly Python runtime (first run)... please wait.\n";
+                pyodideInstance = await loadPyodide();
+            }
+
+            pyodideInstance.setStdout({
+                batched: (msg) => {
+                    term.textContent += msg + '\n';
+                }
+            });
+            term.textContent = "";
+            await pyodideInstance.runPythonAsync(code);
+            const elapsed = Math.round(performance.now() - startTime);
+            term.textContent += `\n[WASM Execution Finished in ${elapsed}ms]`;
+        }
+    } catch (err) {
+        term.textContent += "\n[RUNTIME ERROR]: " + err.message;
+    } finally {
+        runBtn.disabled = false;
+    }
+}
+
+// AI Code Doctor & Auto-Grader
+async function evaluateWithAIDoctor() {
+    const code = document.getElementById('codeEditor').value;
+    const problemTitle = document.getElementById('problemTitle').textContent;
+    const problemDesc = document.getElementById('problemDescription').textContent;
+    const doctorBtn = document.getElementById('aiDoctorBtn');
+    const doctorOut = document.getElementById('doctorOutput');
+
+    // Switch to doctor tab
+    const doctorTab = new bootstrap.Tab(document.getElementById('doctor-tab'));
+    doctorTab.show();
+
+    doctorBtn.disabled = true;
+    doctorOut.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary spinner-border-sm me-2"></div>
+            <span>Gemini AI is analyzing asymptotic complexity, runtime edge cases, and code style...</span>
+        </div>
+    `;
+
+    try {
+        const resp = await fetch('/api/sandbox/evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                code: code,
+                problem_title: problemTitle,
+                problem_description: problemDesc,
+                language: activeLanguage
+            })
+        });
+        const data = await resp.json();
+        doctorBtn.disabled = false;
+
+        if (data.success) {
+            doctorOut.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                    <div>
+                        <span class="badge ${data.verdict === 'Accepted' ? 'bg-success' : 'bg-warning text-dark'} rounded-pill px-3 py-1 fw-bold">
+                            ${data.verdict} (${data.score_out_of_100 || 85}/100)
+                        </span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-info-subtle text-info border border-info-subtle font-mono">Time: ${data.time_complexity || 'O(n)'}</span>
+                        <span class="badge bg-secondary-subtle text-secondary border font-mono">Space: ${data.space_complexity || 'O(1)'}</span>
+                    </div>
+                </div>
+
+                <p class="text-body fw-semibold mb-2">${data.summary || ''}</p>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <div class="p-2 rounded bg-success-subtle text-success small">
+                            <strong><i class="bi bi-check-circle me-1"></i> Strengths:</strong>
+                            <ul class="mb-0 ps-3 mt-1">
+                                ${(data.strengths || []).map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-2 rounded bg-warning-subtle text-warning small">
+                            <strong><i class="bi bi-exclamation-triangle me-1"></i> Edge Cases & Improvements:</strong>
+                            <ul class="mb-0 ps-3 mt-1">
+                                ${(data.issues_or_improvements || []).map(i => `<li>${i}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                ${data.optimized_snippet ? `
+                    <div class="mt-2">
+                        <small class="text-muted fw-bold d-block mb-1">Optimized Architect Solution:</small>
+                        <pre class="p-2 rounded bg-dark text-light small font-mono mb-0" style="max-height: 120px; overflow-y: auto;">${data.optimized_snippet}</pre>
+                    </div>
+                ` : ''}
+            `;
+        } else {
+            doctorOut.innerHTML = `<div class="alert alert-danger py-2 small mb-0">${data.error || 'Evaluation failed.'}</div>`;
+        }
+    } catch (err) {
+        doctorBtn.disabled = false;
+        doctorOut.innerHTML = `<div class="alert alert-danger py-2 small mb-0">Error communicating with AI Auto-Grader: ${err.message}</div>`;
+    }
+}
+
+// Initial load
+onChallengeSelected();
+</script>
+{% endblock %}

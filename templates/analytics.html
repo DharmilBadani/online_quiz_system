@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Cognitive Learning Analytics - QuizVerse Major Project{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11 col-xl-10">
+
+        <!-- Analytics Header Banner -->
+        <div class="hero-card mb-4 p-4 p-md-5">
+            <div class="row align-items-center g-4">
+                <div class="col-md-8">
+                    <div class="hero-pill-badge mb-2">
+                        <span class="badge bg-success text-white fw-bold rounded-pill">ACADEMIC ANALYTICS</span>
+                        <span class="small fw-semibold"><i class="bi bi-graph-up-arrow me-1"></i> Bloom's Taxonomy &amp; Item Response Theory</span>
+                    </div>
+                    <h2 class="display-6 fw-extrabold mb-2">
+                        Cognitive Mastery &amp; Predictive Performance
+                    </h2>
+                    <p class="lead opacity-90 mb-0 small" style="max-width: 620px;">
+                        Deep telemetry tracking accuracy rate, pacing efficiency, cognitive distribution across Bloom's Taxonomy, and automated spaced-repetition study targets.
+                    </p>
+                </div>
+                <div class="col-md-4 text-center d-none d-md-block">
+                    <div class="hero-stats-box">
+                        <div class="display-6 fw-bold text-success mb-1">{{ analytics.avg_accuracy }}%</div>
+                        <div class="small fw-bold text-uppercase text-muted">Overall Technical Command</div>
+                        <hr class="my-2" style="border-color: var(--card-border);">
+                        <div class="small text-muted">{{ analytics.mastery_level }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Key Telemetry Metric Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-md-3">
+                <div class="stat-box">
+                    <span class="stat-label">Evaluated Sessions</span>
+                    <div class="stat-number text-primary">{{ analytics.total_attempts }}</div>
+                    <div class="small text-muted">Complete records parsed</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="stat-box">
+                    <span class="stat-label">Cognitive Tier</span>
+                    <div class="stat-number text-success" style="font-size: 1.35rem; margin-top: 8px;">
+                        {{ analytics.mastery_level }}
+                    </div>
+                    <div class="small text-muted">Based on IRT ability &theta;</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="stat-box">
+                    <span class="stat-label">Integrity Trust Index</span>
+                    <div class="stat-number text-info">{{ analytics.trust_average }}%</div>
+                    <div class="small text-muted">Zero proctoring infractions</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="stat-box">
+                    <span class="stat-label">Pacing Classification</span>
+                    <div class="stat-number text-warning" style="font-size: 1.35rem; margin-top: 8px;">
+                        Methodical
+                    </div>
+                    <div class="small text-muted">Optimal speed vs precision</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- Bloom's Taxonomy Cognitive Distribution -->
+            <div class="col-md-6">
+                <div class="quiz-card p-4 h-100">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-diagram-3-fill text-primary"></i> Bloom's Taxonomy Cognitive Mastery
+                    </h5>
+                    <p class="text-muted small mb-4">
+                        Evaluates question performance broken down by cognitive complexity levels.
+                    </p>
+
+                    {% for level, pct in analytics.blooms_distribution.items() %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold small">{{ level }}</span>
+                            <span class="font-mono small fw-bold text-primary">{{ pct }}%</span>
+                        </div>
+                        <div class="progress" style="height: 10px; background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                            <div class="progress-bar {% if loop.index == 1 %}bg-info{% elif loop.index == 2 %}bg-primary{% elif loop.index == 3 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                 style="width: {{ pct }}%;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Subject Proficiency Breakdown -->
+            <div class="col-md-6">
+                <div class="quiz-card p-4 h-100">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-pie-chart-fill text-success"></i> Discipline Mastery Index
+                    </h5>
+                    <p class="text-muted small mb-4">
+                        Aggregated technical accuracy across evaluated subject categories.
+                    </p>
+
+                    {% if analytics.subject_breakdown %}
+                        {% for cat, pct in analytics.subject_breakdown.items() %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">{{ cat }}</span>
+                                <span class="font-mono small fw-bold text-success">{{ pct }}%</span>
+                            </div>
+                            <div class="progress" style="height: 10px; background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                                <div class="progress-bar bg-success" style="width: {{ pct }}%;"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 text-muted small">
+                            <i class="bi bi-bar-chart fs-3 d-block mb-1 opacity-50"></i>
+                            Complete subject exams to populate discipline rankings.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Spaced Repetition Revision Target Card -->
+        <div class="quiz-card p-4 mb-4">
+            <h5 class="fw-bold mb-2 d-flex align-items-center gap-2">
+                <i class="bi bi-bullseye text-warning"></i> Spaced Repetition Study Targets (Recommended Revision)
+            </h5>
+            <p class="text-muted small mb-3">
+                Targeted recommendations computed from your authentic assessment history to reinforce weak areas and prevent knowledge decay.
+            </p>
+
+            <div class="row g-2">
+                {% if analytics.weak_topics %}
+                    {% for wt in analytics.weak_topics %}
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3 d-flex justify-content-between align-items-center" style="background: var(--neu-surface); box-shadow: var(--neu-flat-sm); border: var(--neu-border);">
+                            <div>
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 rounded-pill small me-2">Focus Topic</span>
+                                <span class="fw-bold small">{{ wt }}</span>
+                            </div>
+                            <a href="{{ url_for('quiz') }}" class="neu-btn px-2 py-1 small">
+                                <i class="bi bi-arrow-right"></i> Drill
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="p-4 rounded-3 text-center" style="background: var(--neu-surface); border: var(--neu-border);">
+                            <i class="bi bi-shield-check text-success fs-3 d-block mb-2"></i>
+                            <div class="fw-bold text-success mb-1">Knowledge Benchmark Optimal</div>
+                            <p class="text-muted small mb-0">{{ analytics.get('weak_topics_note', 'No critical weak topics detected. Great job maintaining high conceptual accuracy!') }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,677 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category_title }} Quiz - QuizVerse{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+        
+        <!-- Sticky Navigation HUD & Progress Header -->
+        <div class="quiz-sticky-header">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <!-- Subject Badge -->
+                    <span class="badge bg-{{ subject_meta.get('color', 'primary') }} px-3 py-2 rounded-pill fw-bold shadow-sm">
+                        <i class="bi {{ subject_meta.get('icon', 'bi-bookmark-fill') }} me-1"></i> {{ category_title }}
+                    </span>
+                    
+                    <!-- Sub-Topic Badge -->
+                    {% if active_subtopic and active_subtopic != 'All Topics' %}
+                    <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2 rounded-pill fw-semibold">
+                        <i class="bi bi-tag-fill me-1"></i> {{ active_subtopic }}
+                    </span>
+                    {% else %}
+                    <span class="badge bg-secondary-subtle text-secondary border px-3 py-2 rounded-pill fw-semibold">
+                        <i class="bi bi-collection-fill me-1"></i> All Topics Exam
+                    </span>
+                    {% endif %}
+
+                    <!-- Candidate Name -->
+                    <span class="badge bg-body-tertiary text-body border px-3 py-2 rounded-pill fw-semibold">
+                        <i class="bi bi-person-fill text-primary me-1"></i> {{ candidate_name }}
+                    </span>
+
+                    <!-- Dynamic Generation Zero-Repeat Badge -->
+                    {% if is_dynamic %}
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fw-semibold" title="Synthesized in real-time with anti-repeat tracking">
+                        <i class="bi bi-stars me-1 text-warning"></i> Dynamic (0 Repeats)
+                    </span>
+                    {% endif %}
+
+                    <!-- Live Progress Counter with Fire icon -->
+                    <span id="answeredCounter" class="fw-bold small text-muted ms-1 d-flex align-items-center gap-1">
+                        <i class="bi bi-fire text-warning"></i>
+                        <span>0 of {{ total_questions }} Answered</span>
+                    </span>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Zen Mode Toggle Button -->
+                    <button type="button" class="glass-icon-btn" id="zenToggleBtn" onclick="toggleZenMode()" title="Toggle Focus / Zen Mode" aria-label="Toggle Focus Mode">
+                        <i class="bi bi-eye-fill" id="zenIcon"></i>
+                    </button>
+
+                    <!-- Circular Pulse Countdown Timer -->
+                    <div class="timer-badge timer-normal" id="timerBadge">
+                        <i class="bi bi-stopwatch-fill"></i>
+                        <span id="timerText">{{ timer_display|default("10:00") }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Animated Progress Bar -->
+            <div class="progress mb-2 rounded-pill bg-body-tertiary" style="height: 6px;">
+                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                     id="liveProgressBar" 
+                     role="progressbar" 
+                     style="width: 0%;" 
+                     aria-valuenow="0" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                </div>
+            </div>
+
+            <!-- Question Number Bubble Matrix Navigator -->
+            <div class="d-flex align-items-center justify-content-between pt-1">
+                <span class="small text-muted fw-bold text-uppercase d-none d-sm-inline" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                    Question Matrix:
+                </span>
+                <div class="q-navigator ms-sm-auto">
+                    {% for q in questions %}
+                        <a href="javascript:void(0)" 
+                           class="q-bubble" 
+                           id="bubble_{{ q['id'] }}" 
+                           onclick="scrollToQuestion('{{ q['id'] }}')" 
+                           title="Question {{ loop.index }}">
+                            {{ loop.index }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Smart Proctoring HUD (Active Invigilation) -->
+        <div class="proctor-hud-card mb-4" id="proctorWidget" {% if not proctor_mode %}style="display: none;"{% endif %}>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="proctor-camera-preview">
+                        <video id="proctorVideo" autoplay playsinline muted></video>
+                        <div id="cameraFallback" class="text-center p-2 small text-muted" style="display: none;">
+                            <i class="bi bi-camera-video-off fs-4 d-block mb-1"></i>
+                            <span>Simulated</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-success text-white px-2 py-1 rounded-pill small" id="proctorStatusBadge">
+                                <i class="bi bi-shield-check me-1"></i> Invigilation Active
+                            </span>
+                            <span class="badge bg-body-tertiary text-body border px-2 py-1 rounded-pill small font-mono" id="gazeBadge">
+                                Gaze: Centered
+                            </span>
+                        </div>
+                        <div class="small text-muted">
+                            Real-time AI telemetry tracking tab switches, window blur, and candidate focus.
+                        </div>
+                        <div class="small text-muted mt-1" style="font-size: 0.72rem;">
+                            <i class="bi bi-shield-lock me-1 text-primary"></i> <strong>Privacy Guarantee:</strong> Client-side focus tracking only. No video or biometric streams are saved or transmitted.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <div class="small text-muted fw-bold text-uppercase" style="font-size: 0.72rem;">Academic Trust Score</div>
+                    <div class="proctor-trust-meter text-success" id="trustMeterDisplay">100%</div>
+                    <div class="small text-danger fw-semibold" id="violationCountDisplay">0 Infractions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Submission Form -->
+        <form action="{{ url_for('submit_quiz') }}" method="POST" id="quizForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="attempt_token" value="{{ attempt_token }}">
+            <input type="hidden" name="trust_score" id="trustScoreInput" value="100">
+            <input type="hidden" name="cheat_flags" id="cheatFlagsInput" value="0">
+            
+            {% for q in questions %}
+                <div class="quiz-card p-4 mb-4 question-card" id="q_card_{{ q['id'] }}">
+                    <!-- Question Header & Badges -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary text-white px-3 py-2 rounded-pill fw-bold">
+                                Question {{ loop.index }} of {{ total_questions }}
+                            </span>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 rounded-pill small">
+                                <i class="bi bi-tag me-1"></i>{{ q['category'] }}
+                            </span>
+                            {% if q.get('topic') %}
+                            <span class="badge bg-secondary-subtle text-secondary border px-2 py-1 rounded-pill small">
+                                <i class="bi bi-bookmark me-1"></i>{{ q['topic'] }}
+                            </span>
+                            {% endif %}
+                            <span class="badge {% if q['difficulty'] == 'Medium' %}bg-warning-subtle text-warning border-warning-subtle{% else %}bg-success-subtle text-success border-success-subtle{% endif %} border px-2 py-1 rounded-pill small">
+                                {{ q['difficulty'] or 'Easy' }}
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2 bookmark-btn" onclick="toggleBookmark('{{ q['id'] }}', this)" title="Bookmark for later study">
+                                <i class="bi bi-bookmark"></i> <span class="d-none d-sm-inline">Save</span>
+                            </button>
+                            <span class="badge bg-secondary-subtle text-secondary px-2 py-1 rounded-pill small font-mono">
+                                1 Mark
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Question Text -->
+                    <h5 class="fw-bold mb-4 text-body lh-base" style="font-size: 1.12rem;">
+                        {{ q['question'] }}
+                    </h5>
+
+                    <!-- Four Answer Options (A, B, C, D) with Keyboard Shortcuts Hints -->
+                    <div class="options-group">
+                        <!-- Option A -->
+                        <label class="option-label" for="q_{{ q['id'] }}_a">
+                            <input type="radio" 
+                                   name="question_{{ q['id'] }}" 
+                                   id="q_{{ q['id'] }}_a" 
+                                   value="A" 
+                                   onchange="onOptionSelected('{{ q['id'] }}')">
+                            <div class="option-tile">
+                                <span class="option-key-badge">A</span>
+                                <span class="option-text">{{ q['option_a'] }}</span>
+                            </div>
+                        </label>
+
+                        <!-- Option B -->
+                        <label class="option-label" for="q_{{ q['id'] }}_b">
+                            <input type="radio" 
+                                   name="question_{{ q['id'] }}" 
+                                   id="q_{{ q['id'] }}_b" 
+                                   value="B" 
+                                   onchange="onOptionSelected('{{ q['id'] }}')">
+                            <div class="option-tile">
+                                <span class="option-key-badge">B</span>
+                                <span class="option-text">{{ q['option_b'] }}</span>
+                            </div>
+                        </label>
+
+                        <!-- Option C -->
+                        <label class="option-label" for="q_{{ q['id'] }}_c">
+                            <input type="radio" 
+                                   name="question_{{ q['id'] }}" 
+                                   id="q_{{ q['id'] }}_c" 
+                                   value="C" 
+                                   onchange="onOptionSelected('{{ q['id'] }}')">
+                            <div class="option-tile">
+                                <span class="option-key-badge">C</span>
+                                <span class="option-text">{{ q['option_c'] }}</span>
+                            </div>
+                        </label>
+
+                        <!-- Option D -->
+                        <label class="option-label" for="q_{{ q['id'] }}_d">
+                            <input type="radio" 
+                                   name="question_{{ q['id'] }}" 
+                                   id="q_{{ q['id'] }}_d" 
+                                   value="D" 
+                                   onchange="onOptionSelected('{{ q['id'] }}')">
+                            <div class="option-tile">
+                                <span class="option-key-badge">D</span>
+                                <span class="option-text">{{ q['option_d'] }}</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- Submit Section -->
+            <div class="quiz-card p-4 mb-5 text-center shadow-sm">
+                <h5 class="fw-bold mb-2">Ready to Submit Your Assessment?</h5>
+                <p class="text-muted small mb-3">
+                    Ensure all questions are answered. Once submitted, your score, letter grade, speed analytics, and printable certificate will be generated.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="button" class="btn btn-gradient-primary btn-lg px-5 py-3 rounded-pill fw-bold shadow-lg" onclick="confirmAndSubmit()">
+                        <i class="bi bi-check2-circle me-2"></i> Submit Quiz &amp; View Results
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
+        <!-- Unanswered Questions Confirmation Modal -->
+        <div class="modal fade" id="submitConfirmModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content quiz-card border-0">
+                    <div class="modal-header border-bottom">
+                        <h5 class="modal-title fw-bold" id="modalTitle">
+                            <i class="bi bi-exclamation-circle-fill text-warning me-2"></i> Confirm Submission
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <p class="mb-0 text-muted" id="modalBodyText">
+                            You have unanswered questions. Are you sure you want to finish now?
+                        </p>
+                    </div>
+                    <div class="modal-footer border-top">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                            Review Answers
+                        </button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold" onclick="document.getElementById('quizForm').submit()">
+                            Submit Anyway
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Interactive Quiz Page Logic & Keyboard Navigation -->
+<script>
+    document.body.classList.add('in-exam');
+    const totalQuestions = {{ total_questions }};
+    const answeredQuestionIds = new Set();
+    let isZenMode = false;
+    let activeQuestionId = null;
+
+    // Smooth scroll to target question card
+    function scrollToQuestion(qId) {
+        activeQuestionId = qId;
+        const el = document.getElementById('q_card_' + qId);
+        if (el) {
+            const yOffset = -150;
+            const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({top: y, behavior: 'smooth'});
+            highlightActiveBubble(qId);
+            updateZenFocus(qId);
+        }
+    }
+
+    function highlightActiveBubble(qId) {
+        document.querySelectorAll('.q-bubble').forEach(b => b.classList.remove('active-view'));
+        const targetBubble = document.getElementById('bubble_' + qId);
+        if (targetBubble) targetBubble.classList.add('active-view');
+    }
+
+    function updateZenFocus(qId) {
+        if (!isZenMode) return;
+        document.querySelectorAll('.question-card').forEach(card => card.classList.remove('active-focus'));
+        const activeCard = document.getElementById('q_card_' + qId);
+        if (activeCard) activeCard.classList.add('active-focus');
+    }
+
+    function toggleZenMode() {
+        isZenMode = !isZenMode;
+        document.body.classList.toggle('zen-mode', isZenMode);
+        const icon = document.getElementById('zenIcon');
+        const btn = document.getElementById('zenToggleBtn');
+        if (isZenMode) {
+            icon.className = 'bi bi-eye-slash-fill text-warning';
+            btn.setAttribute('title', 'Focus Mode: ON (Click to exit)');
+            if (!activeQuestionId) {
+                const firstQ = document.querySelector('.question-card');
+                if (firstQ) scrollToQuestion(firstQ.id.replace('q_card_', ''));
+            } else {
+                updateZenFocus(activeQuestionId);
+            }
+        } else {
+            icon.className = 'bi bi-eye-fill';
+            btn.setAttribute('title', 'Focus Mode: OFF');
+            document.querySelectorAll('.question-card').forEach(card => card.classList.remove('active-focus'));
+        }
+    }
+
+    const autoSaveKey = 'quizverse_autosave_{{ active_category }}_{{ active_subtopic }}';
+
+    function saveAnswerState() {
+        try {
+            const savedState = {};
+            document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
+                savedState[r.name] = r.value;
+            });
+            localStorage.setItem(autoSaveKey, JSON.stringify(savedState));
+        } catch(e) {}
+    }
+
+    // Update progress and bubble on radio select
+    function onOptionSelected(qId) {
+        answeredQuestionIds.add(qId);
+        SoundFX.select();
+        saveAnswerState();
+        
+        // Highlight bubble
+        const bubble = document.getElementById('bubble_' + qId);
+        if (bubble) {
+            bubble.classList.add('answered');
+        }
+
+        // Update progress count
+        const count = answeredQuestionIds.size;
+        const pct = Math.round((count / totalQuestions) * 100);
+
+        document.getElementById('answeredCounter').innerHTML = `
+            <i class="bi bi-fire text-warning"></i>
+            <span>${count} of ${totalQuestions} Answered (${pct}%)</span>
+        `;
+        document.getElementById('liveProgressBar').style.width = pct + '%';
+        document.getElementById('liveProgressBar').setAttribute('aria-valuenow', pct);
+    }
+
+    // Submit handler with check for unanswered questions and double-submit prevention
+    function confirmAndSubmit() {
+        SoundFX.submit();
+        try { localStorage.removeItem(autoSaveKey); } catch(e) {}
+
+        const count = answeredQuestionIds.size;
+        if (count < totalQuestions) {
+            const remaining = totalQuestions - count;
+            document.getElementById('modalBodyText').textContent = 
+                `You have answered ${count} of ${totalQuestions} questions. You have ${remaining} unanswered question(s). Are you sure you want to submit?`;
+            const modal = new bootstrap.Modal(document.getElementById('submitConfirmModal'));
+            modal.show();
+        } else {
+            const submitBtn = document.getElementById('finalSubmitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Finalizing Attempt...';
+            }
+            document.getElementById('quizForm').submit();
+        }
+    }
+
+    // Dynamic Countdown Timer (e.g. 300s for 10 Qs, 600s for 20 Qs)
+    let totalSeconds = {{ timer_seconds|default(600) }};
+    const timerText = document.getElementById('timerText');
+    const timerBadge = document.getElementById('timerBadge');
+
+    const timerInterval = setInterval(function() {
+        totalSeconds--;
+
+        const mins = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        timerText.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (totalSeconds <= 45) {
+            timerBadge.className = 'timer-badge timer-danger';
+            if (totalSeconds === 45) SoundFX.warning();
+        } else if (totalSeconds <= 120) {
+            timerBadge.className = 'timer-badge timer-warning';
+            if (totalSeconds === 120) SoundFX.warning();
+        }
+
+        if (totalSeconds <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('quizForm').submit();
+        }
+    }, 1000);
+
+    // Initial state check and autosave recovery
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Recover auto-saved selections from local storage if available
+        try {
+            const rawSaved = localStorage.getItem(autoSaveKey);
+            if (rawSaved) {
+                const parsed = JSON.parse(rawSaved);
+                for (let field in parsed) {
+                    const radio = document.querySelector(`input[name="${field}"][value="${parsed[field]}"]`);
+                    if (radio) radio.checked = true;
+                }
+            }
+        } catch(e) {}
+
+        // 2. Mark restored radio selections in the question matrix and HUD
+        document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
+            const qId = r.name.replace('question_', '');
+            answeredQuestionIds.add(qId);
+            const bubble = document.getElementById('bubble_' + qId);
+            if (bubble) bubble.classList.add('answered');
+        });
+
+        const count = answeredQuestionIds.size;
+        const pct = Math.round((count / totalQuestions) * 100);
+        document.getElementById('answeredCounter').innerHTML = `
+            <i class="bi bi-fire text-warning"></i>
+            <span>${count} of ${totalQuestions} Answered (${pct}%)</span>
+        `;
+        document.getElementById('liveProgressBar').style.width = pct + '%';
+    });
+
+    // Keyboard Shortcuts Navigation: Press A, B, C, D on active visible question
+    document.addEventListener('keydown', function(e) {
+        // If modal is open or user typing in text input, ignore
+        if (document.querySelector('.modal.show')) return;
+        if (e.target.tagName === 'INPUT' && e.target.type === 'text') return;
+        
+        const key = e.key.toUpperCase();
+        if (['A', 'B', 'C', 'D'].includes(key)) {
+            // Find which question is currently in viewport or focused
+            const questionCards = document.querySelectorAll('.question-card');
+            let currentCard = null;
+            const scrollPos = window.scrollY + 200;
+
+            for (let card of questionCards) {
+                if (card.offsetTop <= scrollPos && (card.offsetTop + card.offsetHeight) > scrollPos) {
+                    currentCard = card;
+                    break;
+                }
+            }
+
+            if (!currentCard && questionCards.length > 0) currentCard = questionCards[0];
+
+            if (currentCard) {
+                const qId = currentCard.id.replace('q_card_', '');
+                const targetRadio = document.getElementById(`q_${qId}_${key.toLowerCase()}`);
+                if (targetRadio) {
+                    targetRadio.checked = true;
+                    onOptionSelected(qId);
+                }
+            }
+        }
+    });
+
+    // AI Vision Proctoring & Gaze Tracking Controller
+    let currentTrustScore = 100;
+    let proctorViolations = 0;
+    const isProctorActive = {{ 'true' if proctor_mode else 'false' }};
+    let gazeAvertedConsecutive = 0;
+    let faceMissingConsecutive = 0;
+
+    function recordProctorViolation(type) {
+        proctorViolations++;
+        currentTrustScore = Math.max(10, currentTrustScore - 15);
+        const tInput = document.getElementById('trustScoreInput');
+        const cInput = document.getElementById('cheatFlagsInput');
+        if (tInput) tInput.value = currentTrustScore;
+        if (cInput) cInput.value = proctorViolations;
+
+        const tMeter = document.getElementById('trustMeterDisplay');
+        const vDisplay = document.getElementById('violationCountDisplay');
+        if (tMeter) {
+            tMeter.textContent = currentTrustScore + '%';
+            if (currentTrustScore < 70) tMeter.className = 'proctor-trust-meter text-danger';
+            else if (currentTrustScore < 85) tMeter.className = 'proctor-trust-meter text-warning';
+        }
+        if (vDisplay) {
+            vDisplay.textContent = `${proctorViolations} Infraction${proctorViolations > 1 ? 's' : ''}`;
+        }
+        if (typeof SoundFX !== 'undefined') SoundFX.warning();
+
+        // Asynchronous Server-Authoritative Telemetry Dispatch
+        try {
+            fetch('/api/proctor/event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    attempt_token: '{{ attempt_token }}',
+                    violation_type: type
+                })
+            }).catch(() => {});
+        } catch (e) {}
+    }
+
+    window.addEventListener('blur', function() {
+        if (isProctorActive) recordProctorViolation('Window Blur');
+    });
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden && isProctorActive) recordProctorViolation('Tab Switch');
+    });
+
+    // Client-Side Vision & Face Centroid Analyzer
+    function initVisionGazeTracking(videoElem) {
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = 160;
+        offCanvas.height = 120;
+        const ctx = offCanvas.getContext('2d', { willReadFrequently: true });
+        const gazeBadge = document.getElementById('gazeBadge');
+
+        setInterval(async () => {
+            if (!videoElem || videoElem.paused || videoElem.ended) return;
+
+            // 1. Check Native Browser FaceDetector API if supported (Chrome 70+)
+            const FaceDetectorAPI = window['FaceDetector'];
+            if (typeof FaceDetectorAPI !== 'undefined') {
+                try {
+                    const detector = new FaceDetectorAPI({ fastMode: true, maxDetectedFaces: 3 });
+                    const faces = await detector.detect(videoElem);
+                    if (faces.length === 0) {
+                        faceMissingConsecutive++;
+                        if (gazeBadge) {
+                            gazeBadge.className = 'badge bg-danger text-white border px-2 py-1 rounded-pill small font-mono';
+                            gazeBadge.innerHTML = '<i class="bi bi-person-x me-1"></i>Face: Missing';
+                        }
+                        if (faceMissingConsecutive === 3) recordProctorViolation('Face Absent / Out of Frame');
+                    } else if (faces.length > 1) {
+                        if (gazeBadge) {
+                            gazeBadge.className = 'badge bg-danger text-white border px-2 py-1 rounded-pill small font-mono';
+                            gazeBadge.innerHTML = '<i class="bi bi-people me-1"></i>Multiple Faces Detected';
+                        }
+                        recordProctorViolation('Multiple Persons in Camera View');
+                    } else {
+                        faceMissingConsecutive = 0;
+                        const box = faces[0].boundingBox;
+                        const cx = (box.x + box.width / 2) / videoElem.videoWidth;
+                        if (cx < 0.28 || cx > 0.72) {
+                            gazeAvertedConsecutive++;
+                            if (gazeBadge) {
+                                gazeBadge.className = 'badge bg-warning text-dark border px-2 py-1 rounded-pill small font-mono';
+                                gazeBadge.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Gaze: Averted';
+                            }
+                            if (gazeAvertedConsecutive === 3) recordProctorViolation('Gaze Averted / Looking Away');
+                        } else {
+                            gazeAvertedConsecutive = 0;
+                            if (gazeBadge) {
+                                gazeBadge.className = 'badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill small font-mono';
+                                gazeBadge.innerHTML = '<i class="bi bi-eye me-1"></i>Gaze: Centered (Focus OK)';
+                            }
+                        }
+                    }
+                    return;
+                } catch (e) {}
+            }
+
+            // 2. High-speed Canvas Optical Motion & Luminance Heuristic Fallback
+            try {
+                if (ctx) {
+                    ctx.drawImage(videoElem, 0, 0, 160, 120);
+                    const frame = ctx.getImageData(0, 0, 160, 120);
+                    const data = frame.data;
+                    let skinPixels = 0;
+                    let sumX = 0;
+
+                    for (let i = 0; i < data.length; i += 16) {
+                        const r = data[i], g = data[i + 1], b = data[i + 2];
+                        // Standard YCbCr-based skin/face locus heuristic
+                        if (r > 60 && g > 40 && b > 20 && r > g && r > b && Math.abs(r - g) > 15) {
+                            skinPixels++;
+                            sumX += (i / 4) % 160;
+                        }
+                    }
+
+                    if (skinPixels < 20) {
+                        faceMissingConsecutive++;
+                        if (gazeBadge) {
+                            gazeBadge.className = 'badge bg-danger text-white border px-2 py-1 rounded-pill small font-mono';
+                            gazeBadge.innerHTML = '<i class="bi bi-person-x me-1"></i>Face: Missing';
+                        }
+                        if (faceMissingConsecutive === 3) recordProctorViolation('Face Absent / Out of Frame');
+                    } else {
+                        faceMissingConsecutive = 0;
+                        const avgX = sumX / skinPixels / 160;
+                        if (avgX < 0.22 || avgX > 0.78) {
+                            gazeAvertedConsecutive++;
+                            if (gazeBadge) {
+                                gazeBadge.className = 'badge bg-warning text-dark border px-2 py-1 rounded-pill small font-mono';
+                                gazeBadge.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Gaze: Averted';
+                            }
+                            if (gazeAvertedConsecutive === 3) recordProctorViolation('Gaze Averted / Looking Away');
+                        } else {
+                            gazeAvertedConsecutive = 0;
+                            if (gazeBadge) {
+                                gazeBadge.className = 'badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill small font-mono';
+                                gazeBadge.innerHTML = '<i class="bi bi-eye me-1"></i>Gaze: Centered (Focus OK)';
+                            }
+                        }
+                    }
+                }
+            } catch (err) {}
+        }, 850);
+    }
+
+    if (isProctorActive && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            .then(stream => {
+                const vid = document.getElementById('proctorVideo');
+                if (vid) {
+                    vid.srcObject = stream;
+                    vid.onloadedmetadata = () => initVisionGazeTracking(vid);
+                }
+            })
+            .catch(() => {
+                const fb = document.getElementById('cameraFallback');
+                if (fb) fb.style.display = 'block';
+            });
+    }
+
+    function toggleBookmark(qid, btn) {
+        fetch('/api/bookmark', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ question_id: qid, action: 'toggle' })
+        })
+        .then(r => {
+            if (r.status === 401 || r.redirected) {
+                alert('Please sign in to save bookmarks to your personal study vault.');
+                return null;
+            }
+            return r.json();
+        })
+        .then(data => {
+            if (!data) return;
+            if (data.success) {
+                if (data.bookmarked) {
+                    btn.classList.remove('btn-outline-secondary');
+                    btn.classList.add('btn-warning');
+                    btn.innerHTML = '<i class="bi bi-bookmark-fill"></i> <span class="d-none d-sm-inline">Saved</span>';
+                } else {
+                    btn.classList.remove('btn-warning');
+                    btn.classList.add('btn-outline-secondary');
+                    btn.innerHTML = '<i class="bi bi-bookmark"></i> <span class="d-none d-sm-inline">Save</span>';
+                }
+            }
+        })
+        .catch(err => console.error(err));
+    }
+</script>
+{% endblock %}

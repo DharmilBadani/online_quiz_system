@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Control Center - QuizVerse Major Project{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-12 col-xl-11">
+
+        <!-- Admin Command Header Banner with Cyber-Amber / Crimson Shield Theme -->
+        <div class="hero-card hero-admin mb-4 p-4 p-md-5">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <div class="hero-pill-badge mb-2">
+                        <span class="role-pill admin">
+                            <span class="beacon-pulse beacon-admin"></span> ADMINISTRATOR CONSOLE
+                        </span>
+                        <span class="small fw-semibold ms-1"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Tier-1 Maximum Privileges</span>
+                    </div>
+                    <h2 class="display-6 fw-extrabold mb-1">
+                        System Administration &amp; Access Control
+                    </h2>
+                    <p class="lead opacity-90 mb-0 small" style="max-width: 620px;">
+                        Manage institutional accounts, calibrate role-based access control (RBAC), inspect security violation telemetry, and execute system-wide diagnostic audits.
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('faculty_studio') }}" class="neu-btn px-4 py-2 rounded-pill fw-bold text-success">
+                        <i class="bi bi-mortarboard-fill me-1"></i> Faculty Studio
+                    </a>
+                    <a href="{{ url_for('export_attempts_csv') }}" class="btn btn-gradient-primary px-4 py-2 rounded-pill fw-bold shadow-sm" style="background: var(--role-admin-gradient);">
+                        <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Export Full Audit CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Overview KPI Ribbon -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-admin">
+                    <div class="kpi-orb kpi-orb-admin">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Registered Accounts</div>
+                        <div class="kpi-value text-warning">{{ total_users }}</div>
+                        <div class="kpi-desc">{{ role_counts.get('student', 0) }} Students &bull; {{ role_counts.get('faculty', 0) }} Faculty &bull; {{ role_counts.get('admin', 0) }} Admins</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-admin">
+                    <div class="kpi-orb kpi-orb-cyan">
+                        <i class="bi bi-cpu-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Question Bank &amp; Engine</div>
+                        <div class="kpi-value text-info">{{ total_q + total_dynamic_q }}</div>
+                        <div class="kpi-desc">{{ total_q }} Seeded &bull; {{ total_dynamic_q }} Dynamic (0 Repeats)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-admin">
+                    <div class="kpi-orb kpi-orb-admin">
+                        <i class="bi bi-award-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Total Exam Attempts</div>
+                        <div class="kpi-value text-primary">{{ total_attempts }}</div>
+                        <div class="kpi-desc">Persisted Submission Records</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-admin">
+                    <div class="kpi-orb kpi-orb-danger">
+                        <i class="bi bi-shield-slash-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Proctoring Telemetry Flags</div>
+                        <div class="kpi-value text-danger">{{ total_proctor_flags }}</div>
+                        <div class="kpi-desc">Recorded Integrity Events</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: User Accounts & RBAC Role Administration -->
+        <div class="quiz-card role-card-admin p-4 p-md-5 mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-2 border-bottom" style="border-color: var(--card-border) !important;">
+                <div>
+                    <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                        <i class="bi bi-people-fill text-warning"></i> Institutional User Management &amp; Role Enforcement
+                    </h4>
+                    <p class="text-muted small mb-0">
+                        Assign permissions: <strong>Students</strong> (take exams), <strong>Faculty</strong> (author &amp; audit exams), and <strong>Administrators</strong> (maximum rights).
+                    </p>
+                </div>
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill font-mono fw-bold">
+                    <i class="bi bi-shield-check me-1"></i> {{ users|length }} User Records
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle" style="color: var(--text-primary);">
+                    <thead>
+                        <tr class="text-muted small text-uppercase" style="border-color: var(--card-border);">
+                            <th>User ID</th>
+                            <th>Candidate / Member</th>
+                            <th>Email Address</th>
+                            <th>Registered Role</th>
+                            <th>Role Administration</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr style="border-color: var(--card-border);">
+                            <td class="font-mono small fw-bold">#{{ u.id }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge rounded-circle p-2 text-white" 
+                                          style="background-color: {{ u.avatar_color|default('#4f46e5') }}; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem;">
+                                        {{ u.username[0]|upper }}
+                                    </span>
+                                    <div>
+                                        <div class="fw-bold text-body">{{ u.full_name or u.username }}</div>
+                                        <small class="text-muted">@{{ u.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="small">{{ u.email or 'N/A' }}</td>
+                            <td>
+                                {% if u.role == 'admin' %}
+                                    <span class="role-pill admin">
+                                        <span class="beacon-pulse beacon-admin"></span> Admin
+                                    </span>
+                                {% elif u.role == 'faculty' %}
+                                    <span class="role-pill faculty">
+                                        <span class="beacon-pulse beacon-faculty"></span> Faculty
+                                    </span>
+                                {% else %}
+                                    <span class="role-pill student">
+                                        <span class="beacon-pulse beacon-student"></span> Student
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('admin_update_user_role', user_id=u.id) }}" method="POST" class="d-flex align-items-center gap-2">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <select name="role" class="form-select form-select-sm" style="max-width: 140px; background: var(--neu-surface); color: var(--text-primary); border: var(--neu-border);">
+                                        <option value="student" {% if u.role == 'student' %}selected{% endif %}>Student</option>
+                                        <option value="faculty" {% if u.role == 'faculty' %}selected{% endif %}>Faculty</option>
+                                        <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>Admin</option>
+                                    </select>
+                                    <button type="submit" class="neu-btn btn-sm px-2 py-1 rounded-pill small text-warning fw-bold" title="Update Role">
+                                        <i class="bi bi-arrow-repeat"></i> Update
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="text-end">
+                                {% if u.id != current_user.id %}
+                                <form action="{{ url_for('admin_delete_user', user_id=u.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete user @{{ u.username }}?');" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="neu-btn btn-sm text-danger px-3 py-1 rounded-pill small" title="Delete User">
+                                        <i class="bi bi-trash-fill me-1"></i> Delete
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary small px-2 py-1 rounded-pill">Current Session</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 2: Security Telemetry & Proctoring Incident Logs -->
+        <div class="quiz-card role-card-admin p-4 p-md-5 mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-2 border-bottom" style="border-color: var(--card-border) !important;">
+                <div>
+                    <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-exclamation text-danger"></i> Proctoring Telemetry Security Audit
+                    </h4>
+                    <p class="text-muted small mb-0">Live audit of tab-switch violations, window blur incidents, and low trust scores.</p>
+                </div>
+                {% if proctor_logs %}
+                <form action="{{ url_for('admin_clear_proctor_logs') }}" method="POST" onsubmit="return confirm('Are you sure you want to purge all proctor violation logs?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="neu-btn btn-sm text-danger px-3 py-2 rounded-pill fw-bold">
+                        <i class="bi bi-trash3-fill me-1"></i> Purge All Violation Logs
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            {% if proctor_logs %}
+            <div class="table-responsive">
+                <table class="table align-middle" style="color: var(--text-primary);">
+                    <thead>
+                        <tr class="text-muted small text-uppercase" style="border-color: var(--card-border);">
+                            <th>ID</th>
+                            <th>Candidate</th>
+                            <th>Violation Category</th>
+                            <th>Telemetry Details</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in proctor_logs %}
+                        <tr style="border-color: var(--card-border);">
+                            <td class="font-mono small">#{{ log.id }}</td>
+                            <td class="fw-bold">{{ log.candidate_name }}</td>
+                            <td>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill small">
+                                    <span class="beacon-pulse beacon-danger me-1"></span> {{ log.violation_type }}
+                                </span>
+                            </td>
+                            <td class="small text-muted">{{ log.details }}</td>
+                            <td class="small font-mono">{{ log.timestamp }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-shield-check fs-1 text-success mb-2 d-block"></i>
+                <div class="fw-bold text-success">Clean Telemetry Record</div>
+                <div class="small">No exam integrity violations currently logged in the system.</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Section 3: System Health & Diagnostic Architecture -->
+        <div class="quiz-card role-card-admin p-4 mb-5">
+            <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-cpu text-info"></i> System Health &amp; Architectural Diagnostics
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="glass-panel p-3 h-100">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="beacon-pulse beacon-live"></span>
+                            <strong class="small text-body">SQLite Database</strong>
+                        </div>
+                        <div class="small text-muted mb-1">Path: <code>quiz.db</code> (Local Core Relational)</div>
+                        <div class="small text-muted">Bank: {{ total_q }} &bull; Dynamic: {{ total_dynamic_q }} &bull; Anti-Repeat: {{ total_history_records }} hashes</div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="glass-panel p-3 h-100">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="beacon-pulse {% if api_key_configured %}beacon-live{% else %}beacon-admin{% endif %}"></span>
+                            <strong class="small text-body">Google Gemini GenAI Engine</strong>
+                        </div>
+                        <div class="small text-muted mb-1">Status: {% if api_key_configured %}<span class="text-success fw-bold">Operational (gemini-3.5-flash-lite)</span>{% else %}<span class="text-warning fw-bold">Offline Fallback</span>{% endif %}</div>
+                        <div class="small text-muted">Endpoints: Live Synthesizer, Socratic Tutor, Oral Viva</div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="glass-panel p-3 h-100">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="beacon-pulse beacon-live"></span>
+                            <strong class="small text-body">RBAC Enforcement Layer</strong>
+                        </div>
+                        <div class="small text-muted mb-1">Hierarchy: Student &rarr; Faculty &rarr; Administrator</div>
+                        <div class="small text-muted">Session: {{ current_user.username }} ({{ user_role|capitalize }})</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

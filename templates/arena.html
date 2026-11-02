@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}1v1 Live Quiz Arena - QuizVerse Major Project{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+
+        <!-- Arena Face-Off Banner -->
+        <div class="hero-card mb-4 p-4 text-center">
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-2 hero-pill-badge">
+                <span class="badge bg-danger text-white fw-bold rounded-pill">LIVE ARENA</span>
+                <span class="small fw-semibold">1v1 Real-Time Speed Duel</span>
+            </div>
+            <h2 class="display-6 fw-extrabold mb-2">Technical Rapid-Fire Arena</h2>
+            <p class="text-muted small mb-3">5 Rapid-fire questions. Speed and accuracy determine the match winner!</p>
+
+            <!-- Dual Competitor HUD -->
+            <div class="row align-items-center g-3 mt-1">
+                <div class="col-5">
+                    <div class="p-3 rounded-4" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                        <div class="fw-bold text-primary mb-1">
+                            <i class="bi bi-person-fill me-1"></i> You ({{ session.get('candidate_name', 'Challenger') }})
+                        </div>
+                        <div class="display-6 font-mono fw-bold text-primary" id="playerScore">0</div>
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div class="progress-bar bg-primary" id="playerBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-2 text-center">
+                    <div class="badge bg-danger rounded-circle p-3 shadow-sm fs-5 fw-bold" style="box-shadow: var(--neu-flat);">
+                        VS
+                    </div>
+                </div>
+
+                <div class="col-5">
+                    <div class="p-3 rounded-4" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                        <div class="fw-bold text-danger mb-1 d-flex align-items-center justify-content-between">
+                            <span><i class="bi bi-robot me-1"></i> ApexBot</span>
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle small font-mono" style="font-size: 0.65rem;">AI SIMULATION</span>
+                        </div>
+                        <div class="display-6 font-mono fw-bold text-danger" id="botScore">0</div>
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div class="progress-bar bg-danger" id="botBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-3 pt-2 border-top border-secondary-subtle">
+                <span class="small text-muted">
+                    <i class="bi bi-info-circle me-1 text-info"></i>
+                    <strong>Transparency Notice:</strong> ApexBot is an algorithmic benchmark opponent (75% baseline accuracy with jittered reaction latency) designed for pacing drills.
+                </span>
+            </div>
+        </div>
+
+        <!-- Interactive Question Arena Box -->
+        <div class="quiz-card p-4 p-md-5" id="arenaCard">
+            {% if arena_questions %}
+            <div id="arenaGame">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-primary px-3 py-2 rounded-pill font-mono" id="qCounter">
+                        Question 1 of {{ arena_questions|length }}
+                    </span>
+                    <span class="timer-badge timer-normal" id="arenaTimer">
+                        <i class="bi bi-stopwatch"></i> <span id="timerSec">15</span>s
+                    </span>
+                </div>
+
+                <h4 class="fw-bold mb-4" id="arenaQuestionText">
+                    {{ arena_questions[0]['question'] }}
+                </h4>
+
+                <div class="options-group mb-4" id="arenaOptions">
+                    <button type="button" class="option-tile text-start w-100" onclick="answerDuel('A')">
+                        <span class="option-key-badge">A</span>
+                        <span class="option-text" id="optA">{{ arena_questions[0]['option_a'] }}</span>
+                    </button>
+                    <button type="button" class="option-tile text-start w-100" onclick="answerDuel('B')">
+                        <span class="option-key-badge">B</span>
+                        <span class="option-text" id="optB">{{ arena_questions[0]['option_b'] }}</span>
+                    </button>
+                    <button type="button" class="option-tile text-start w-100" onclick="answerDuel('C')">
+                        <span class="option-key-badge">C</span>
+                        <span class="option-text" id="optC">{{ arena_questions[0]['option_c'] }}</span>
+                    </button>
+                    <button type="button" class="option-tile text-start w-100" onclick="answerDuel('D')">
+                        <span class="option-key-badge">D</span>
+                        <span class="option-text" id="optD">{{ arena_questions[0]['option_d'] }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Victory / Defeat Screen -->
+            <div id="arenaResult" style="display: none;" class="text-center py-4">
+                <div class="display-3 mb-2" id="duelIcon">🏆</div>
+                <h2 class="display-6 fw-bold mb-2" id="duelTitle">Duel Completed!</h2>
+                <p class="text-muted mb-4" id="duelSubtitle">Final Results calculation</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('arena') }}" class="btn btn-gradient-primary px-4 py-2 rounded-pill fw-bold">
+                        <i class="bi bi-arrow-repeat me-1"></i> Rematch Duel
+                    </a>
+                    <a href="{{ url_for('index') }}" class="neu-btn px-4 py-2 rounded-pill">
+                        Return Home
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-controller text-muted display-4 mb-3 d-block"></i>
+                <h4 class="fw-bold mb-2">No Duel Questions Available</h4>
+                <p class="text-muted mb-4">No questions are currently loaded for the 1v1 Arena. Return to the home dashboard to practice.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-gradient-primary px-4 py-2 rounded-pill">
+                    Return to Dashboard
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const questions = {{ (arena_questions or [])|tojson }};
+    let currentIdx = 0;
+    let pScore = 0;
+    let bScore = 0;
+    let timeLeft = 15;
+    let timerInterval = null;
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 15;
+        document.getElementById('timerSec').textContent = timeLeft;
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timerSec').textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                answerDuel('TIMEOUT');
+            }
+        }, 1000);
+    }
+
+    function loadQuestion(idx) {
+        if (idx >= questions.length) {
+            endGame();
+            return;
+        }
+        const q = questions[idx];
+        document.getElementById('qCounter').textContent = `Question ${idx + 1} of ${questions.length}`;
+        document.getElementById('arenaQuestionText').textContent = q.question;
+        document.getElementById('optA').textContent = q.option_a;
+        document.getElementById('optB').textContent = q.option_b;
+        document.getElementById('optC').textContent = q.option_c;
+        document.getElementById('optD').textContent = q.option_d;
+        startTimer();
+    }
+
+    function answerDuel(chosen) {
+        clearInterval(timerInterval);
+        const q = questions[currentIdx];
+        if (chosen === q.correct_answer) {
+            pScore += 100 + timeLeft * 5;
+            if (typeof SoundFX !== 'undefined') SoundFX.select();
+        } else {
+            if (typeof SoundFX !== 'undefined') SoundFX.warning();
+        }
+
+        // ApexBot simulation: 75% accuracy
+        const botSuccess = Math.random() < 0.75;
+        if (botSuccess) {
+            bScore += 100 + Math.floor(Math.random() * 50);
+        }
+
+        document.getElementById('playerScore').textContent = pScore;
+        document.getElementById('botScore').textContent = bScore;
+        document.getElementById('playerBar').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
+        document.getElementById('botBar').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
+
+        currentIdx++;
+        setTimeout(() => {
+            loadQuestion(currentIdx);
+        }, 600);
+    }
+
+    function endGame() {
+        document.getElementById('arenaGame').style.display = 'none';
+        document.getElementById('arenaResult').style.display = 'block';
+
+        const dTitle = document.getElementById('duelTitle');
+        const dSub = document.getElementById('duelSubtitle');
+        const dIcon = document.getElementById('duelIcon');
+
+        if (pScore > bScore) {
+            dTitle.textContent = "Victory Achieved!";
+            dSub.textContent = `You outpaced ApexBot with ${pScore} pts vs ${bScore} pts!`;
+            dIcon.textContent = "🏆";
+            if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70 });
+        } else if (pScore === bScore) {
+            dTitle.textContent = "Draw Match!";
+            dSub.textContent = `Dead heat: Both scored ${pScore} pts!`;
+            dIcon.textContent = "🤝";
+        } else {
+            dTitle.textContent = "Defeat to ApexBot";
+            dSub.textContent = `ApexBot took the win (${bScore} pts vs ${pScore} pts). Retake the duel!`;
+            dIcon.textContent = "⚡";
+        }
+    }
+
+    if (questions && questions.length > 0) {
+        startTimer();
+    }
+</script>
+{% endblock %}

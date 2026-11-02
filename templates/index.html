@@ -1,0 +1,591 @@
+{% extends "base.html" %}
+
+{% block title %}Hub - Choose Subject & Sub-Topic{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-12 col-xl-11">
+        
+        {% if is_guest_preview and not is_authenticated %}
+        <div class="alert alert-info d-flex align-items-center justify-content-between rounded-4 py-2 px-3 mb-3" style="background: var(--neu-surface); box-shadow: var(--neu-flat-sm); border: 1px solid rgba(59, 130, 246, 0.3);">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-eye-fill text-info fs-5"></i>
+                <span class="small"><strong>Guest Preview Mode:</strong> You are exploring the curriculum. <a href="{{ url_for('login') }}" class="text-primary fw-bold text-decoration-none">Sign in</a> to record verified grades and unlock AI Oral Viva Voce.</span>
+            </div>
+            <a href="{{ url_for('login') }}" class="btn btn-sm btn-gradient-primary rounded-pill px-3">Sign In</a>
+        </div>
+        {% endif %}
+
+        <!-- Modern Cyber-Glassmorphic Student Hero Banner Section -->
+        <div class="hero-card hero-student mb-4 p-4 p-md-5">
+            <div class="row align-items-center g-4">
+                <div class="col-md-7">
+                    {% if is_authenticated %}
+                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                        <span class="badge rounded-circle text-white" style="background-color: {{ current_user.avatar_color|default('#4f46e5') }}; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem;">
+                            {{ current_user.username[0]|upper }}
+                        </span>
+                        <span class="small fw-semibold">Authenticated: <strong class="text-primary">{{ current_user.full_name or current_user.username }}</strong> &bull; <span class="badge bg-primary text-uppercase" style="font-size:0.65rem;">{{ user_role }}</span></span>
+                    </div>
+                    {% endif %}
+                    <div class="hero-pill-badge mb-3">
+                        <span class="role-pill student">
+                            <span class="beacon-pulse beacon-student"></span> 100% DYNAMIC AI
+                        </span>
+                        <span class="small fw-semibold ms-1"><i class="bi bi-stars text-warning me-1"></i> Google Gemini GenAI &bull; Infinite Non-Repeating Questions &bull; 80 Sub-Topics</span>
+                    </div>
+                    <h1 class="display-4 fw-extrabold mb-2 lh-tight">
+                        Master Any Subject.<br>
+                        <span class="text-gradient">Dynamic Real-Time AI Generation.</span>
+                    </h1>
+                    <p class="lead opacity-90 mb-3 small" style="max-width: 580px;">
+                        Completely dynamic assessment platform powered by <strong>Google Gemini</strong>. 
+                        Zero hardcoded questions &bull; Every question synthesized on-demand with 
+                        <strong>cryptographic anti-repeat tracking</strong>, <strong>AI Proctoring</strong>, and <strong>1v1 Live Rapid Duel Arena</strong>.
+                    </p>
+
+                    <!-- Quick Action Badges for Major Features -->
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <a href="{{ url_for('arena') }}" class="neu-btn px-3 py-1 small">
+                            <i class="bi bi-controller text-danger"></i> 1v1 Arena
+                        </a>
+                        <a href="{{ url_for('ai_generator') }}" class="neu-btn px-3 py-1 small">
+                            <i class="bi bi-stars text-info"></i> GenAI Studio
+                        </a>
+                        <a href="{{ url_for('viva_exam') }}" class="neu-btn px-3 py-1 small">
+                            <i class="bi bi-mic-fill text-danger"></i> AI Viva
+                        </a>
+                        <a href="{{ url_for('code_sandbox') }}" class="neu-btn px-3 py-1 small">
+                            <i class="bi bi-code-slash text-success"></i> Sandbox
+                        </a>
+                        <a href="{{ url_for('analytics_dashboard') }}" class="neu-btn px-3 py-1 small">
+                            <i class="bi bi-graph-up-arrow text-success"></i> Cognitive Radar
+                        </a>
+                    </div>
+
+                    <!-- Candidate Name Input Field & AI Proctoring Switch -->
+                    <div style="max-width: 480px;">
+                        <label for="globalCandidateName" class="form-label small fw-bold text-uppercase opacity-75">
+                            Candidate Profile Name
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 text-primary" style="background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                                <i class="bi bi-person-bounding-box fs-5"></i>
+                            </span>
+                            <input type="text" 
+                                   id="globalCandidateName" 
+                                   class="form-control form-control-lg fw-semibold" 
+                                   placeholder="Enter your name (e.g. Aryan Sharma)" 
+                                   value="{{ session.get('candidate_name', '') if session.get('candidate_name') != 'Candidate' else '' }}"
+                                   aria-label="Candidate Name"
+                                   oninput="syncCandidateName(this.value)">
+                        </div>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mt-2 gap-2">
+                            <small class="opacity-75">
+                                <i class="bi bi-patch-check-fill text-warning me-1"></i> Printed on Official Certificate.
+                            </small>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input cursor-pointer" type="checkbox" id="dynamicToggle" checked onchange="toggleDynamic(this.checked)">
+                                    <label class="form-check-label small fw-bold cursor-pointer" for="dynamicToggle" title="Real-time GenAI & Algorithmic generation with guaranteed 0 repetition">
+                                        <i class="bi bi-stars text-warning me-1"></i> Dynamic Mode (Zero Repeats)
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input cursor-pointer" type="checkbox" id="proctorToggle" onchange="toggleProctor(this.checked)">
+                                    <label class="form-check-label small fw-bold cursor-pointer" for="proctorToggle">
+                                        <i class="bi bi-camera-video-fill text-info me-1"></i> AI Proctor
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-5 d-none d-md-flex justify-content-center">
+                    <div class="hero-stats-box w-100" style="max-width: 360px;">
+                        <div class="display-5 fw-bold text-primary mb-1">&infin;</div>
+                        <div class="small text-uppercase fw-bold text-warning letter-spacing-1 mb-3">Infinite Dynamic AI Questions</div>
+                        <hr class="my-3" style="border-color: var(--card-border);">
+                        <div class="row g-2 text-start small">
+                            <div class="col-6"><i class="bi bi-stars text-warning me-1"></i> Google Gemini AI</div>
+                            <div class="col-6"><i class="bi bi-shield-check text-success me-1"></i> 0 Repeats Guaranteed</div>
+                            <div class="col-6"><i class="bi bi-check-circle-fill text-info me-1"></i> 8 Core Disciplines</div>
+                            <div class="col-6"><i class="bi bi-check-circle-fill text-success me-1"></i> 80 Sub-Topics</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Mission Telemetry KPI Ribbon -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-student">
+                    <div class="kpi-orb kpi-orb-student">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Disciplines</div>
+                        <div class="kpi-value">8 Active</div>
+                        <div class="kpi-desc">80 Curated Sub-Topics</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-student">
+                    <div class="kpi-orb kpi-orb-cyan">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">AI Engine</div>
+                        <div class="kpi-value">&infin; Infinite</div>
+                        <div class="kpi-desc">Gemini GenAI (0 Static)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-student">
+                    <div class="kpi-orb kpi-orb-student">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Anti-Repeat</div>
+                        <div class="kpi-value">100% Unique</div>
+                        <div class="kpi-desc">SHA-256 Memory Guard</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-student">
+                    <div class="kpi-orb kpi-orb-student">
+                        <i class="bi bi-camera-video-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">AI Proctor</div>
+                        <div class="kpi-value">Active HUD</div>
+                        <div class="kpi-desc">Gaze &amp; Blur Telemetry</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Mission Control / Custom Quiz Launcher -->
+        <div class="quiz-card p-4 p-md-4 mb-5 border-2 border-primary shadow-sm">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="brand-icon-wrapper">
+                        <i class="bi bi-cpu-fill"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">Custom Quiz Launcher &bull; Interactive Mission Control</h4>
+                        <p class="text-muted small mb-0">Switch subjects below to view 10-question drills or launch the 20-question subject exam.</p>
+                    </div>
+                </div>
+
+                <!-- Live Sub-Topic Quick Search Bar -->
+                <div class="position-relative" style="min-width: 260px;">
+                    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" 
+                           id="topicSearchInput" 
+                           class="form-control form-control-sm rounded-pill ps-5 py-2 border-primary-subtle" 
+                           placeholder="Filter sub-topics (e.g. loop, crud, join)..."
+                           oninput="filterTopics(this.value)">
+                </div>
+            </div>
+
+            <!-- Horizontal Subject Carousel Tabs -->
+            <div class="subject-carousel-nav mb-4" id="subjectNav">
+                {% for subj_key, subj in subject_catalog.items() %}
+                <button type="button" 
+                        class="subject-nav-pill {% if loop.first %}active{% endif %}" 
+                        id="pill_{{ subj_key }}"
+                        onclick="selectSubject('{{ subj_key }}')">
+                    <i class="bi {{ subj.icon }}"></i>
+                    <span>{{ subj.title }}</span>
+                </button>
+                {% endfor %}
+            </div>
+
+            <!-- Dynamic Active Subject Mission Hub -->
+            <div id="subjectHubContent" class="p-3 p-md-4 rounded-4 border border-light-subtle" style="background: rgba(255, 255, 255, 0.03);">
+                <!-- Subject Banner and 20-Q Exam CTA -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom border-light-subtle">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary fs-6 px-3 py-1 rounded-pill" id="hubBadge">Core Enterprise Language</span>
+                            <span class="text-muted small fw-bold">&bull; Dynamic GenAI Engine &bull; 10 Specialized Sub-Topics</span>
+                        </div>
+                        <h3 class="fw-extrabold mb-1" id="hubTitle">Java Programming</h3>
+                        <p class="text-muted small mb-0" id="hubDesc">
+                            OOP, loops, collections, exceptions, JDBC database connections, and CRUD operations.
+                        </p>
+                    </div>
+
+                    <!-- Direct Launch 20-Question Subject Exam Button -->
+                    <form action="{{ url_for('quiz') }}" method="POST" id="hubExamForm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="category" id="hubExamCategory" value="Java">
+                        <input type="hidden" name="topic" value="All Topics">
+                        <input type="hidden" name="candidate_name" class="topicCandidateName" value="Candidate">
+                        <input type="hidden" name="dynamic" class="topicDynamicInput" value="1">
+                        <button type="submit" class="btn btn-gradient-primary btn-lg px-4 py-2 rounded-pill fw-bold shadow-sm d-flex align-items-center gap-2">
+                            <i class="bi bi-play-circle-fill fs-5"></i>
+                            <span id="hubExamBtnText">Launch 20-Q Java Exam (10:00)</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Sub-Topics 10-Question Drills Grid -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="small fw-bold text-uppercase text-muted letter-spacing-1">
+                        <i class="bi bi-grid-3x3-gap-fill text-primary me-1"></i> Choose a Sub-Topic Drill (10 Questions &bull; 05:00 Mins)
+                    </span>
+                    <span class="badge bg-secondary-subtle text-secondary rounded-pill small" id="topicCountBadge">
+                        10 Sub-Topics Available
+                    </span>
+                </div>
+
+                <!-- Subtopics Card Grid (Populated via JS) -->
+                <div class="row g-3" id="subtopicsGrid">
+                    <!-- Dynamic topic drill cards inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Master Challenge Banner -->
+        <div class="quiz-card p-4 mb-5 border-2 border-warning shadow-sm">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 bg-warning bg-opacity-15 text-warning rounded-circle fs-1 shadow-sm">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h4 class="fw-bold mb-0">Master Challenge (All 8 Subjects Combined)</h4>
+                            <span class="badge bg-warning text-dark px-2 py-1 rounded-pill small fw-bold">Dynamic AI</span>
+                        </div>
+                        <p class="text-muted small mb-0">
+                            The ultimate computer science test. Synthesizes 20 dynamic questions across Java, Python, C++, DBMS, WebDev, Flask, DSA, and OS.
+                        </p>
+                    </div>
+                </div>
+                <form action="{{ url_for('quiz') }}" method="POST" class="ms-auto">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="category" value="All">
+                    <input type="hidden" name="topic" value="All Topics">
+                    <input type="hidden" name="candidate_name" class="topicCandidateName" value="Candidate">
+                    <input type="hidden" name="dynamic" class="topicDynamicInput" value="1">
+                    <button type="submit" class="btn btn-gradient-warning btn-lg px-4 py-2 rounded-pill fw-bold text-white shadow-sm d-flex align-items-center gap-2">
+                        <i class="bi bi-play-circle-fill fs-5"></i>
+                        <span>Start Master Challenge</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- All 8 Subjects Showcase Grid -->
+        <div class="text-center mb-4">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold mb-2">
+                <i class="bi bi-collection-fill me-1"></i> Full Academic Curriculum
+            </span>
+            <h2 class="h3 fw-bold mb-1">All 8 Core Disciplines</h2>
+            <p class="text-muted small">Deep subtopic coverage with dynamic Gemini AI generation on-demand for academic presentations &amp; viva.</p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            {% for subj_key, subj in subject_catalog.items() %}
+            <div class="col-md-6 col-lg-6 col-xl-6">
+                <div class="quiz-card p-4 h-100 hover-lift d-flex flex-column justify-content-between">
+                    <div>
+                        <!-- Header Badges -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-{{ subj.color }}-subtle text-{{ subj.color }} border border-{{ subj.color }}-subtle px-3 py-1 rounded-pill fw-bold">
+                                {{ subj.badge }}
+                            </span>
+                            <span class="badge bg-secondary-subtle text-secondary px-3 py-1 rounded-pill small fw-bold">
+                                Dynamic AI &bull; 10 Topics
+                            </span>
+                        </div>
+
+                        <!-- Title and Icon -->
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <div class="p-3 bg-{{ subj.color }} bg-opacity-10 text-{{ subj.color }} rounded-circle fs-3">
+                                <i class="bi {{ subj.icon }}"></i>
+                            </div>
+                            <div>
+                                <h4 class="fw-bold mb-0 text-body">{{ subj.title }}</h4>
+                                <small class="text-muted">100 Distinct Questions Pool</small>
+                            </div>
+                        </div>
+
+                        <p class="text-muted small mt-2 mb-3">
+                            {{ subj.description }}
+                        </p>
+
+                        <!-- Accordion for Topics -->
+                        <div class="accordion accordion-flush mb-3 border rounded-3 overflow-hidden" id="acc_{{ subj_key }}">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading_{{ subj_key }}">
+                                    <button class="accordion-button collapsed py-2 px-3 bg-body-tertiary small fw-bold text-body" 
+                                            type="button" 
+                                            data-bs-toggle="collapse" 
+                                            data-bs-target="#collapse_{{ subj_key }}" 
+                                            aria-expanded="false" 
+                                            aria-controls="collapse_{{ subj_key }}">
+                                        <i class="bi bi-list-task me-2 text-primary"></i> Browse 10 Sub-Topics (10-Q Drills)
+                                    </button>
+                                </h2>
+                                <div id="collapse_{{ subj_key }}" 
+                                     class="accordion-collapse collapse" 
+                                     aria-labelledby="heading_{{ subj_key }}" 
+                                     data-bs-parent="#acc_{{ subj_key }}">
+                                    <div class="accordion-body p-2 bg-body">
+                                        <div class="d-flex flex-column gap-1">
+                                            {% for top in subj.topics %}
+                                            <div class="d-flex justify-content-between align-items-center p-2 rounded hover-bg border-bottom border-light-subtle">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-light text-muted border px-2 py-1 small rounded-circle">
+                                                        {{ loop.index }}
+                                                    </span>
+                                                    <span class="small fw-semibold text-body">{{ top }}</span>
+                                                </div>
+                                                <form action="{{ url_for('quiz') }}" method="POST" class="m-0">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <input type="hidden" name="category" value="{{ subj_key }}">
+                                                    <input type="hidden" name="topic" value="{{ top }}">
+                                                    <input type="hidden" name="candidate_name" class="topicCandidateName" value="Candidate">
+                                                    <button type="submit" class="btn btn-sm btn-outline-{{ subj.color }} rounded-pill px-3 py-1 fw-bold">
+                                                        <i class="bi bi-play-fill"></i> Drill (10 Qs)
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Exam Button -->
+                    <form action="{{ url_for('quiz') }}" method="POST" class="mt-2">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="category" value="{{ subj_key }}">
+                        <input type="hidden" name="topic" value="All Topics">
+                        <input type="hidden" name="candidate_name" class="topicCandidateName" value="Candidate">
+                        <button type="submit" class="btn btn-{{ subj.color }} w-100 py-2 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-play-circle-fill me-1"></i> Start 20-Q {{ subj_key }} Exam
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+<!-- Embedded Interactive Logic -->
+<script>
+    const CATALOG = {{ subject_catalog | tojson }};
+    let currentSelectedSubject = 'Java';
+
+    function syncCandidateName(val) {
+        const trimmed = val.trim() || 'Candidate';
+        if (val.trim()) {
+            try { localStorage.setItem('quiz_candidate_name', val.trim()); } catch(e) {}
+        }
+        const hiddenInputs = document.querySelectorAll('.topicCandidateName');
+        hiddenInputs.forEach(input => {
+            input.value = trimmed;
+        });
+    }
+
+    function selectSubject(subjKey) {
+        if (!CATALOG[subjKey]) return;
+        currentSelectedSubject = subjKey;
+        SoundFX.click();
+
+        // Clear subtopic search on switching subject
+        const searchInput = document.getElementById('topicSearchInput');
+        if (searchInput) searchInput.value = '';
+
+        // Update pills active state
+        document.querySelectorAll('.subject-nav-pill').forEach(pill => pill.classList.remove('active'));
+        const activePill = document.getElementById('pill_' + subjKey);
+        if (activePill) activePill.classList.add('active');
+
+        // Update Mission Hub details
+        const subj = CATALOG[subjKey];
+        document.getElementById('hubTitle').textContent = subj.title;
+        document.getElementById('hubBadge').textContent = subj.badge;
+        document.getElementById('hubBadge').className = `badge bg-${subj.color} fs-6 px-3 py-1 rounded-pill`;
+        document.getElementById('hubDesc').textContent = subj.description;
+        document.getElementById('hubExamCategory').value = subjKey;
+        document.getElementById('hubExamBtnText').textContent = `Launch 20-Q ${subjKey} Exam (10:00)`;
+
+        renderSubtopics(subj.topics, subjKey, subj.color);
+    }
+
+    function renderSubtopics(topics, subjKey, colorName) {
+        const grid = document.getElementById('subtopicsGrid');
+        grid.innerHTML = '';
+
+        topics.forEach((topicName, idx) => {
+            const col = document.createElement('div');
+            col.className = 'col-sm-6 col-lg-4 col-xl-3 topic-item';
+            col.setAttribute('data-topic', topicName.toLowerCase());
+
+            col.innerHTML = `
+                <div class="topic-drill-card">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-secondary-subtle text-secondary font-mono small px-2 py-1 rounded">
+                                ${String(idx + 1).padStart(2, '0')}
+                            </span>
+                            <span class="badge bg-success-subtle text-success small px-2 py-1 rounded-pill">
+                                10 Qs &bull; 5 Min
+                            </span>
+                        </div>
+                        <h6 class="fw-bold mb-2 text-body" style="font-size: 0.92rem; line-height: 1.35;">
+                            ${topicName}
+                        </h6>
+                    </div>
+                    <form action="{{ url_for('quiz') }}" method="POST" class="mt-3 m-0">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="category" value="${subjKey}">
+                        <input type="hidden" name="topic" value="${topicName}">
+                        <input type="hidden" name="candidate_name" class="topicCandidateName" value="${document.getElementById('globalCandidateName').value.trim() || 'Candidate'}">
+                        <input type="hidden" name="dynamic" class="topicDynamicInput" value="${isDynamicMode ? '1' : '0'}">
+                        ${(document.getElementById('proctorToggle') && document.getElementById('proctorToggle').checked) ? '<input type="hidden" name="proctor" value="1">' : ''}
+                        <button type="submit" class="btn btn-sm btn-outline-${colorName} w-100 rounded-pill fw-bold py-1">
+                            <i class="bi bi-lightning-charge-fill me-1"></i> Start Drill
+                        </button>
+                    </form>
+                </div>
+            `;
+            grid.appendChild(col);
+        });
+
+        document.getElementById('topicCountBadge').textContent = `${topics.length} Sub-Topics Available`;
+        const pToggle = document.getElementById('proctorToggle');
+        if (pToggle && pToggle.checked) {
+            updateProctorInputs(true);
+        }
+    }
+
+    function filterTopics(query) {
+        const q = query.toLowerCase().trim();
+        const items = document.querySelectorAll('.topic-item');
+        let visibleCount = 0;
+        items.forEach(item => {
+            const text = item.getAttribute('data-topic') || '';
+            if (!q || text.includes(q)) {
+                item.style.display = '';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        let emptyNotice = document.getElementById('emptySearchNotice');
+        if (visibleCount === 0) {
+            if (!emptyNotice) {
+                emptyNotice = document.createElement('div');
+                emptyNotice.id = 'emptySearchNotice';
+                emptyNotice.className = 'col-12 text-center py-4 text-muted';
+                emptyNotice.innerHTML = `
+                    <i class="bi bi-search fs-2 mb-2 d-block opacity-50"></i>
+                    <h6 class="fw-bold">No sub-topics match "${query}"</h6>
+                    <p class="small mb-0">Try typing another keyword (e.g. loop, crud, join, function)</p>
+                `;
+                document.getElementById('subtopicsGrid').appendChild(emptyNotice);
+            }
+        } else if (emptyNotice) {
+            emptyNotice.remove();
+        }
+
+        document.getElementById('topicCountBadge').textContent = `${visibleCount} Topics Found`;
+    }
+
+    // Initialize Hub with Java and restored Candidate Name
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('globalCandidateName');
+        try {
+            const stored = localStorage.getItem('quiz_candidate_name');
+            if (stored && input && !input.value) {
+                input.value = stored;
+                syncCandidateName(stored);
+            } else if (input && input.value) {
+                syncCandidateName(input.value);
+            }
+        } catch(e) {}
+        selectSubject('Java');
+
+        const proctorSaved = localStorage.getItem('quiz_proctor_mode') === 'true';
+        const pToggle = document.getElementById('proctorToggle');
+        if (pToggle) {
+            pToggle.checked = proctorSaved;
+            updateProctorInputs(proctorSaved);
+        }
+
+        const dynamicSaved = localStorage.getItem('quiz_dynamic_mode');
+        const dToggle = document.getElementById('dynamicToggle');
+        if (dToggle) {
+            isDynamicMode = (dynamicSaved === null || dynamicSaved === 'true');
+            dToggle.checked = isDynamicMode;
+            updateDynamicInputs(isDynamicMode);
+        }
+    });
+
+    let isDynamicMode = true;
+
+    function toggleDynamic(enabled) {
+        isDynamicMode = enabled;
+        try { localStorage.setItem('quiz_dynamic_mode', enabled); } catch(e) {}
+        updateDynamicInputs(enabled);
+        if (typeof SoundFX !== 'undefined') SoundFX.click();
+    }
+
+    function updateDynamicInputs(enabled) {
+        document.querySelectorAll('form[action*="quiz"]').forEach(f => {
+            let existing = f.querySelector('input[name="dynamic"]');
+            if (existing) {
+                existing.value = enabled ? '1' : '0';
+            } else {
+                let inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'dynamic';
+                inp.className = 'topicDynamicInput';
+                inp.value = enabled ? '1' : '0';
+                f.appendChild(inp);
+            }
+        });
+    }
+
+    function toggleProctor(enabled) {
+        localStorage.setItem('quiz_proctor_mode', enabled);
+        updateProctorInputs(enabled);
+        if (typeof SoundFX !== 'undefined') SoundFX.click();
+    }
+
+    function updateProctorInputs(enabled) {
+        document.querySelectorAll('form[action*="quiz"]').forEach(f => {
+            let existing = f.querySelector('input[name="proctor"]');
+            if (enabled) {
+                if (!existing) {
+                    let inp = document.createElement('input');
+                    inp.type = 'hidden';
+                    inp.name = 'proctor';
+                    inp.value = '1';
+                    f.appendChild(inp);
+                }
+            } else if (existing) {
+                existing.remove();
+            }
+        });
+    }
+</script>
+{% endblock %}

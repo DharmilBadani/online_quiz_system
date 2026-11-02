@@ -1,0 +1,41 @@
+# Environments and Secrets
+.env
+.env.*
+*.env
+!.env.example
+
+# SQLite Database and local state
+quiz.db*
+*.db*
+*.sqlite*
+*.sqlite3*
+
+# Backups and Distribution archives
+backups/
+dist/
+*.zip
+
+# Python Bytecode and Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Testing and Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+logs/
+
+# IDE and Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+.DS_Store

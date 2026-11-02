@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Question Study Vault &bull; QuizVerse{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Header Banner -->
+        <div class="quiz-card p-4 mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                        <i class="bi bi-bookmark-star-fill text-warning"></i> Personal Study Vault
+                    </h3>
+                    <p class="text-muted small mb-0">
+                        Curated revision repository of questions bookmarked during exams and practice drills.
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-2 fw-bold">
+                        <i class="bi bi-bookmarks me-1"></i> {{ bookmarks|length }} Saved Question{{ 's' if bookmarks|length != 1 else '' }}
+                    </span>
+                    <a href="{{ url_for('quiz') }}" class="neu-btn px-3 py-2 small">
+                        <i class="bi bi-play-circle me-1"></i> Start New Quiz
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if bookmarks %}
+        <div class="d-flex flex-column gap-3">
+            {% for b in bookmarks %}
+            <div class="quiz-card p-4" id="bookmark-card-{{ b['question_id'] }}">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary text-white px-3 py-1 rounded-pill small fw-bold">
+                            #{{ b['question_id'] }}
+                        </span>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 rounded-pill small">
+                            {{ b['category'] }}
+                        </span>
+                        {% if b['topic'] %}
+                        <span class="badge bg-secondary-subtle text-secondary border px-2 py-1 rounded-pill small">
+                            {{ b['topic'] }}
+                        </span>
+                        {% endif %}
+                        <span class="badge {% if b['difficulty'] == 'Hard' %}bg-danger-subtle text-danger{% elif b['difficulty'] == 'Medium' %}bg-warning-subtle text-warning{% else %}bg-success-subtle text-success{% endif %} border px-2 py-1 rounded-pill small">
+                            {{ b['difficulty'] or 'Medium' }}
+                        </span>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="removeBookmark('{{ b['question_id'] }}')">
+                        <i class="bi bi-bookmark-dash me-1"></i> Remove
+                    </button>
+                </div>
+
+                <h5 class="fw-bold mb-3 lh-base">{{ b['question'] }}</h5>
+
+                <!-- Options Grid -->
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <div class="p-2 rounded-3 small {% if b['correct_answer'] == 'A' %}border border-success bg-success-subtle text-success fw-bold{% else %}text-muted{% endif %}" style="background: var(--neu-surface);">
+                            <span class="badge bg-secondary me-1">A</span> {{ b['option_a'] }}
+                            {% if b['correct_answer'] == 'A' %}<i class="bi bi-check-circle-fill text-success ms-1"></i> (Correct){% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-2 rounded-3 small {% if b['correct_answer'] == 'B' %}border border-success bg-success-subtle text-success fw-bold{% else %}text-muted{% endif %}" style="background: var(--neu-surface);">
+                            <span class="badge bg-secondary me-1">B</span> {{ b['option_b'] }}
+                            {% if b['correct_answer'] == 'B' %}<i class="bi bi-check-circle-fill text-success ms-1"></i> (Correct){% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-2 rounded-3 small {% if b['correct_answer'] == 'C' %}border border-success bg-success-subtle text-success fw-bold{% else %}text-muted{% endif %}" style="background: var(--neu-surface);">
+                            <span class="badge bg-secondary me-1">C</span> {{ b['option_c'] }}
+                            {% if b['correct_answer'] == 'C' %}<i class="bi bi-check-circle-fill text-success ms-1"></i> (Correct){% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-2 rounded-3 small {% if b['correct_answer'] == 'D' %}border border-success bg-success-subtle text-success fw-bold{% else %}text-muted{% endif %}" style="background: var(--neu-surface);">
+                            <span class="badge bg-secondary me-1">D</span> {{ b['option_d'] }}
+                            {% if b['correct_answer'] == 'D' %}<i class="bi bi-check-circle-fill text-success ms-1"></i> (Correct){% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if b['explanation'] %}
+                <div class="p-3 rounded-3 small text-muted" style="background: var(--neu-surface); border-left: 3px solid var(--primary-accent);">
+                    <strong class="text-primary d-block mb-1"><i class="bi bi-lightbulb me-1"></i> Pedagogical Explanation:</strong>
+                    {{ b['explanation'] }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="quiz-card p-5 text-center">
+            <i class="bi bi-bookmark text-muted display-4 d-block mb-3"></i>
+            <h4 class="fw-bold mb-2">Your Study Vault is Empty</h4>
+            <p class="text-muted small mb-4">
+                Bookmark challenging questions during quizzes or mistake reviews to build your personal revision bank.
+            </p>
+            <a href="{{ url_for('quiz') }}" class="btn btn-primary px-4 py-2 rounded-pill fw-bold">
+                <i class="bi bi-lightning-charge me-1"></i> Take a Practice Quiz
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function removeBookmark(qid) {
+    if (!confirm('Remove this question from your study vault?')) return;
+    
+    fetch('/api/bookmark', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ question_id: qid, action: 'remove' })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const el = document.getElementById('bookmark-card-' + qid);
+            if (el) {
+                el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(-10px)';
+                setTimeout(() => el.remove(), 300);
+            }
+        }
+    })
+    .catch(err => console.error(err));
+}
+</script>
+{% endblock %}

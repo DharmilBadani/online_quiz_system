@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - QuizVerse Next-Gen AI Examination Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-12 col-xl-11">
+
+        <!-- ===================================================================
+             1. HERO GATEWAY SECTION
+             =================================================================== -->
+        <div class="hero-card mb-5 p-4 p-md-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <div class="hero-pill-badge mb-3">
+                        <span class="badge bg-primary text-white fw-bold rounded-pill">ACADEMIC MAJOR CAPSTONE</span>
+                        <span class="small fw-semibold">
+                            <i class="bi bi-shield-check text-success me-1"></i> Role-Based Access &bull; 100% Dynamic AI &bull; Google Gemini GenAI
+                        </span>
+                    </div>
+
+                    <h1 class="display-4 fw-extrabold mb-3 lh-tight">
+                        Next-Gen Technical Exams.<br>
+                        <span class="text-gradient">Powered by Cognitive AI.</span>
+                    </h1>
+
+                    <p class="lead opacity-90 mb-4" style="font-size: 1.05rem; max-width: 620px; line-height: 1.6;">
+                        A comprehensive academic assessment ecosystem featuring <strong>Multi-Sensor AI Proctoring</strong>,
+                        <strong>Speech-Driven Oral Viva Voce</strong>, <strong>Socratic Doubt Tutoring</strong>,
+                        <strong>1v1 Speed Duels</strong>, and <strong>Bloom's Taxonomy Analytics</strong> across 8 technical disciplines.
+                    </p>
+
+                    <!-- Primary Action Buttons -->
+                    <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+                        <a href="{{ url_for('login') }}" class="btn btn-gradient-primary px-4 py-3 rounded-pill fw-bold shadow-sm d-flex align-items-center gap-2">
+                            <i class="bi bi-box-arrow-in-right fs-5"></i>
+                            <span>Sign In to Access Portal</span>
+                        </a>
+
+                        <a href="{{ url_for('register') }}" class="neu-btn px-4 py-3 rounded-pill fw-bold d-flex align-items-center gap-2">
+                            <i class="bi bi-person-plus-fill text-primary fs-5"></i>
+                            <span>Create Account</span>
+                        </a>
+
+                        <a href="{{ url_for('index', guest=1) }}" class="neu-btn px-3 py-3 rounded-pill text-muted small d-flex align-items-center gap-2" title="Browse all 8 subjects and subtopics without logging in">
+                            <i class="bi bi-eye-fill text-info"></i>
+                            <span>Guest Preview</span>
+                        </a>
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center gap-3 opacity-75 small">
+                        <span><i class="bi bi-check-circle-fill text-success me-1"></i> Normal exam hub unlocks upon login</span>
+                        <span>&bull;</span>
+                        <span><i class="bi bi-shield-lock-fill text-warning me-1"></i> Strict Student / Faculty / Admin RBAC</span>
+                    </div>
+                </div>
+
+                <!-- Right Column: Instant 1-Click Fast-Pass Box for Evaluators -->
+                <div class="col-lg-5">
+                    <div class="p-4 rounded-4 position-relative" style="background: var(--neu-surface); box-shadow: var(--neu-flat); border: var(--neu-border);">
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom" style="border-color: var(--card-border) !important;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="brand-icon-wrapper" style="width: 36px; height: 36px; font-size: 1rem;">
+                                    <i class="bi bi-lightning-charge-fill text-warning"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-0">1-Click Fast Pass</h6>
+                                    <span class="text-muted" style="font-size: 0.72rem;">Examiner &amp; Evaluator Instant Access</span>
+                                </div>
+                            </div>
+                            <span class="badge bg-warning text-dark fw-bold rounded-pill" style="font-size: 0.7rem;">DEMO READY</span>
+                        </div>
+
+                        <p class="small text-muted mb-3">
+                            Click any role below to authenticate instantly and unlock the <strong>normal landing page</strong> with corresponding role privileges:
+                        </p>
+
+                        <div class="d-flex flex-column gap-2 mb-3">
+                            <!-- Student Demo Fast-Pass -->
+                            <a href="{{ url_for('demo_login', role='student') }}" class="role-fastpass-card student-pass text-decoration-none">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="p-2 rounded-circle" style="background: rgba(99, 102, 241, 0.15); color: var(--role-student-primary);">
+                                        <i class="bi bi-mortarboard-fill fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-body small d-flex align-items-center gap-2">
+                                            <span>Enter as Student</span>
+                                            <span class="beacon-pulse beacon-student"></span>
+                                        </div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">Exams, Viva Voce, 1v1 Arena, AI Tutor</div>
+                                    </div>
+                                </div>
+                                <span class="badge rounded-pill bg-primary" style="font-size: 0.7rem;">Enter &rarr;</span>
+                            </a>
+
+                            <!-- Faculty Demo Fast-Pass -->
+                            <a href="{{ url_for('demo_login', role='faculty') }}" class="role-fastpass-card faculty-pass text-decoration-none">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="p-2 rounded-circle" style="background: rgba(16, 185, 129, 0.15); color: var(--role-faculty-primary);">
+                                        <i class="bi bi-speedometer2 fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-body small d-flex align-items-center gap-2">
+                                            <span>Enter as Faculty</span>
+                                            <span class="beacon-pulse beacon-faculty"></span>
+                                        </div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">Authoring Studio, CSV Export, Question CRUD</div>
+                                    </div>
+                                </div>
+                                <span class="badge rounded-pill bg-success" style="font-size: 0.7rem;">Enter &rarr;</span>
+                            </a>
+
+                            <!-- Admin Demo Fast-Pass -->
+                            <a href="{{ url_for('demo_login', role='admin') }}" class="role-fastpass-card admin-pass text-decoration-none">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="p-2 rounded-circle" style="background: rgba(245, 158, 11, 0.15); color: var(--role-admin-primary);">
+                                        <i class="bi bi-shield-lock-fill fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-body small d-flex align-items-center gap-2">
+                                            <span>Enter as Administrator</span>
+                                            <span class="beacon-pulse beacon-admin"></span>
+                                        </div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">Full Governance, User Roles, Proctor Purging</div>
+                                    </div>
+                                </div>
+                                <span class="badge rounded-pill bg-warning text-dark" style="font-size: 0.7rem;">Enter &rarr;</span>
+                            </a>
+                        </div>
+
+                        <div class="text-center pt-2">
+                            <span class="text-muted" style="font-size: 0.75rem;">
+                                Or sign in with custom credentials via <a href="{{ url_for('login') }}" class="text-primary fw-bold text-decoration-none">Standard Login &rarr;</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+             2. CAPSTONE PILLARS & AI CAPABILITIES GRID
+             =================================================================== -->
+        <div class="text-center mb-4">
+            <span class="badge bg-primary text-white rounded-pill px-3 py-1 mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                ENTERPRISE ARCHITECTURE
+            </span>
+            <h2 class="fw-extrabold mb-2">Major Project Super-Features</h2>
+            <p class="text-muted small mx-auto" style="max-width: 600px;">
+                Engineered with Google Gemini AI, Web Speech Synthesis/Recognition APIs, and real-time behavioral telemetry.
+            </p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <!-- Feature 1: AI Oral Viva Voce -->
+            <div class="col-md-6 col-lg-4">
+                <div class="quiz-card p-4 h-100 d-flex flex-column justify-content-between transition-all">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="brand-icon-wrapper" style="width: 48px; height: 48px; font-size: 1.4rem; background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
+                                <i class="bi bi-mic-fill"></i>
+                            </div>
+                            <span class="badge bg-danger rounded-pill" style="font-size: 0.7rem;">SPEECH AI</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">AI Oral Viva Voce Examiner</h5>
+                        <p class="text-muted small mb-3">
+                            Speaks dynamic conceptual viva questions aloud via Text-to-Speech and captures student speech defense via live microphone transcription, followed by Gemini 10-point rubric evaluation.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--card-border) !important;">
+                        <span class="small text-muted"><i class="bi bi-soundwave text-danger me-1"></i> Web Speech API</span>
+                        <a href="{{ url_for('viva_exam') }}" class="small fw-bold text-danger text-decoration-none">Launch Viva &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2: Socratic AI Doubt Tutor -->
+            <div class="col-md-6 col-lg-4">
+                <div class="quiz-card p-4 h-100 d-flex flex-column justify-content-between transition-all">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="brand-icon-wrapper" style="width: 48px; height: 48px; font-size: 1.4rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">
+                                <i class="bi bi-robot"></i>
+                            </div>
+                            <span class="badge bg-primary rounded-pill" style="font-size: 0.7rem;">SOCRATIC TUTOR</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Socratic AI Doubt Tutor</h5>
+                        <p class="text-muted small mb-3">
+                            Post-examination interactive AI tutor that doesn't just hand out answers—it guides the student through why their selected choice was incorrect and cements the foundational concept.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--card-border) !important;">
+                        <span class="small text-muted"><i class="bi bi-chat-quote-fill text-primary me-1"></i> Multi-Turn Guidance</span>
+                        <span class="badge rounded-pill bg-primary" style="font-size: 0.7rem;">Active on Result Page</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3: GenAI Question Synthesizer -->
+            <div class="col-md-6 col-lg-4">
+                <div class="quiz-card p-4 h-100 d-flex flex-column justify-content-between transition-all">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="brand-icon-wrapper" style="width: 48px; height: 48px; font-size: 1.4rem; background: linear-gradient(135deg, #06b6d4, #0284c7); color: white;">
+                                <i class="bi bi-stars"></i>
+                            </div>
+                            <span class="badge bg-info rounded-pill" style="font-size: 0.7rem;">LLM SYNTHESIZER</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">GenAI Question Synthesizer</h5>
+                        <p class="text-muted small mb-3">
+                            Generates complete multi-choice examinations on any syllabus topic mapped to Bloom's Taxonomy cognitive depth (Remembering, Analyzing, Evaluating) with pedagogical rationales.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--card-border) !important;">
+                        <span class="small text-muted"><i class="bi bi-cpu-fill text-info me-1"></i> Gemini 3.5 Flash</span>
+                        <a href="{{ url_for('ai_generator') }}" class="small fw-bold text-info text-decoration-none">Open Studio &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 4: Intelligent Anti-Cheat Proctoring -->
+            <div class="col-md-6 col-lg-4">
+                <div class="quiz-card p-4 h-100 d-flex flex-column justify-content-between transition-all">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="brand-icon-wrapper" style="width: 48px; height: 48px; font-size: 1.4rem; background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                                <i class="bi bi-camera-video-fill"></i>
+                            </div>
+                            <span class="badge bg-success rounded-pill" style="font-size: 0.7rem;">AI PROCTORING</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Multi-Sensor Proctoring</h5>
+                        <p class="text-muted small mb-3">
+                            Simulated camera stream, browser tab-switching monitoring, window blur detection, and dynamic Trust Score calculation with violation logging for faculty audit trails.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--card-border) !important;">
+                        <span class="small text-muted"><i class="bi bi-shield-lock-fill text-success me-1"></i> Trust Score Engine</span>
+                        <span class="badge rounded-pill bg-success" style="font-size: 0.7rem;">Integrated in Exams</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 5: 1v1 Real-Time Battle Arena -->
+            <div class="col-md-6 col-lg-4">
+                <div class="quiz-card p-4 h-100 d-flex flex-column justify-content-between transition-all">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="brand-icon-wrapper" style="width: 48px; height: 48px; font-size: 1.4rem; background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                                <i class="bi bi-controller"></i>
+                            </div>
+                            <span class="badge bg-warning text-dark rounded-pill" style="font-size: 0.7rem;">GAMIFIED DUEL</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">1v1 Speed Duel Arena</h5>
+                        <p class="text-muted small mb-3">
+                            Competitive 5-round rapid-fire arena against the platform benchmark ApexBot with streak multipliers, audio-visual feedback, and live competitive scorecards.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--card-border) !important;">
+                        <span class="small text-muted"><i class="bi bi-lightning-fill text-warning me-1"></i> Sub-Second Feedback</span>
+                        <a href="{{ url_for('arena') }}" class="small fw-bold text-warning text-decoration-none">Enter Arena &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 6: Cognitive Analytics & IRT -->
+            <div class="col-md-6 col-lg-4">
+                <div class="quiz-card p-4 h-100 d-flex flex-column justify-content-between transition-all">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="brand-icon-wrapper" style="width: 48px; height: 48px; font-size: 1.4rem; background: linear-gradient(135deg, #ec4899, #be185d); color: white;">
+                                <i class="bi bi-pie-chart-fill"></i>
+                            </div>
+                            <span class="badge bg-danger rounded-pill" style="font-size: 0.7rem;">COGNITIVE IRT</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Bloom's Taxonomy Radar</h5>
+                        <p class="text-muted small mb-3">
+                            Multi-dimensional cognitive radar mapping historical performance into Remembering, Analyzing, and Creating tiers with Item Response Theory speed metrics.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--card-border) !important;">
+                        <span class="small text-muted"><i class="bi bi-graph-up text-danger me-1"></i> Cognitive Profiling</span>
+                        <a href="{{ url_for('analytics_dashboard') }}" class="small fw-bold text-danger text-decoration-none">View Radar &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+             3. CURRICULUM OVERVIEW (8 DISCIPLINES, 80 SUBTOPICS, 100% DYNAMIC AI)
+             =================================================================== -->
+        <div class="quiz-card p-4 p-md-5 mb-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-5">
+                    <span class="badge bg-primary text-white rounded-pill px-3 py-1 mb-2 fw-bold" style="font-size: 0.75rem;">
+                        CURRICULUM INVENTORY
+                    </span>
+                    <h3 class="fw-extrabold mb-3">8 Academic Disciplines &bull; Infinite Dynamic Questions</h3>
+                    <p class="text-muted small mb-4">
+                        Each discipline features 10 structured subtopics powered by live Google Gemini question synthesis with cryptographic zero-repeat guarantees.
+                    </p>
+
+                    <div class="d-flex flex-column gap-2 mb-4">
+                        <div class="d-flex align-items-center gap-2 small">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span><strong>Full Subject Exam:</strong> 20 randomized questions (10:00 timer)</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 small">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span><strong>Sub-Topic Drill:</strong> 10 focused questions (05:00 timer)</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 small">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span><strong>Dynamic Scrambling:</strong> A/B/C/D option permutation</span>
+                        </div>
+                    </div>
+
+                    <a href="{{ url_for('index', guest=1) }}" class="neu-btn px-4 py-2 rounded-pill small fw-bold d-inline-flex align-items-center gap-2">
+                        <i class="bi bi-grid-3x3-gap-fill text-primary"></i>
+                        <span>Explore Subject Catalog &rarr;</span>
+                    </a>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="row g-2">
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 rounded-4 text-center" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                                <i class="bi bi-filetype-java fs-2 text-danger d-block mb-1"></i>
+                                <span class="fw-bold small d-block">Java</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">100 Questions</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 rounded-4 text-center" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                                <i class="bi bi-filetype-py fs-2 text-primary d-block mb-1"></i>
+                                <span class="fw-bold small d-block">Python</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">100 Questions</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 rounded-4 text-center" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                                <i class="bi bi-file-earmark-code fs-2 text-info d-block mb-1"></i>
+                                <span class="fw-bold small d-block">C++</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">100 Questions</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 rounded-4 text-center" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                                <i class="bi bi-code-slash fs-2 text-warning d-block mb-1"></i>
+                                <span class="fw-bold small d-block">WebDev</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">100 Questions</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 rounded-4 text-center" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                                <i class="bi bi-database-fill fs-2 text-success d-block mb-1"></i>
+                                <span class="fw-bold small d-block">DBMS</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">100 Questions</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 rounded-4 text-center" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                                <i class="bi bi-braces-asterisk fs-2 text-danger d-block mb-1"></i>
+                                <span class="fw-bold small d-block">Flask</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">100 Questions</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 rounded-4 text-center" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                                <i class="bi bi-diagram-3-fill fs-2 text-primary d-block mb-1"></i>
+                                <span class="fw-bold small d-block">DSA</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">100 Questions</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 rounded-4 text-center" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                                <i class="bi bi-cpu-fill fs-2 text-secondary d-block mb-1"></i>
+                                <span class="fw-bold small d-block">OS</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">100 Questions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+             4. ROLE-BASED ACCESS CONTROL MATRIX
+             =================================================================== -->
+        <div class="quiz-card p-4 p-md-5 mb-5">
+            <div class="text-center mb-4">
+                <span class="badge bg-warning text-dark rounded-pill px-3 py-1 mb-2 fw-bold" style="font-size: 0.75rem;">
+                    ACADEMIC GOVERNANCE
+                </span>
+                <h3 class="fw-extrabold mb-2">Role-Based Access Control (RBAC) Architecture</h3>
+                <p class="text-muted small mx-auto" style="max-width: 650px;">
+                    Strict cryptographic privilege separation. Students take exams and seek AI tutoring, Faculty manage curriculums, and Administrators maintain full oversight.
+                </p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Student Card -->
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 h-100" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-mortarboard-fill text-primary fs-4"></i>
+                            <h5 class="fw-bold mb-0">Student Role</h5>
+                        </div>
+                        <ul class="list-unstyled small d-flex flex-column gap-2 text-muted mb-4">
+                            <li><i class="bi bi-check2 text-success me-1"></i> Take full examinations &amp; topic drills</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> AI Oral Viva Voce defense examination</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> Socratic AI Doubt resolution on results</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> 1v1 Battle Arena &amp; Leaderboards</li>
+                            <li><i class="bi bi-x-circle text-danger me-1"></i> <em>Blocked from Faculty Authoring Studio</em></li>
+                            <li><i class="bi bi-x-circle text-danger me-1"></i> <em>Blocked from Administrator Console</em></li>
+                        </ul>
+                        <a href="{{ url_for('demo_login', role='student') }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill">
+                            Demo Student Mode
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Faculty Card -->
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 h-100" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-briefcase-fill text-success fs-4"></i>
+                            <h5 class="fw-bold mb-0">Faculty Role</h5>
+                        </div>
+                        <ul class="list-unstyled small d-flex flex-column gap-2 text-muted mb-4">
+                            <li><i class="bi bi-check2 text-success me-1"></i> All Student capabilities included</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> <strong>Faculty Authoring Studio</strong> access</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> Add / Delete Question Bank items</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> Commit GenAI questions to official DB</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> <strong>CSV Audit Report Export</strong> with Trust Scores</li>
+                            <li><i class="bi bi-x-circle text-danger me-1"></i> <em>Blocked from User Deletion &amp; Role Changes</em></li>
+                        </ul>
+                        <a href="{{ url_for('demo_login', role='faculty') }}" class="btn btn-sm btn-outline-success w-100 rounded-pill">
+                            Demo Faculty Mode
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Admin Card -->
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 h-100" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-shield-lock-fill text-warning fs-4"></i>
+                            <h5 class="fw-bold mb-0">Administrator Role</h5>
+                        </div>
+                        <ul class="list-unstyled small d-flex flex-column gap-2 text-muted mb-4">
+                            <li><i class="bi bi-check2 text-success me-1"></i> <strong>Maximum Privileges</strong> across system</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> <strong>Admin Control Console</strong> access</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> Promote / Demote any user role</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> Delete compromised accounts</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> Purge Proctoring Violation Telemetry logs</li>
+                            <li><i class="bi bi-check2 text-success me-1"></i> Unrestricted Faculty Studio &amp; CSV export</li>
+                        </ul>
+                        <a href="{{ url_for('demo_login', role='admin') }}" class="btn btn-sm btn-outline-warning w-100 rounded-pill">
+                            Demo Administrator Mode
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================
+             5. BOTTOM CALL TO ACTION
+             =================================================================== -->
+        <div class="text-center py-4 mb-4">
+            <h3 class="fw-extrabold mb-2">Ready to enter your examination?</h3>
+            <p class="text-muted small mb-4">
+                Sign in with your institutional credentials or use a 1-click demo pass to access the full assessment catalog.
+            </p>
+            <div class="d-flex justify-content-center flex-wrap gap-3">
+                <a href="{{ url_for('login') }}" class="btn btn-gradient-primary px-4 py-3 rounded-pill fw-bold shadow-sm">
+                    <i class="bi bi-box-arrow-in-right me-2"></i> Sign In to Portal
+                </a>
+                <a href="{{ url_for('register') }}" class="neu-btn px-4 py-3 rounded-pill fw-bold">
+                    <i class="bi bi-person-plus-fill me-2 text-primary"></i> Register New Student
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

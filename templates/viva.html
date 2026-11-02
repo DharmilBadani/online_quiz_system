@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+
+{% block title %}AI Oral Viva Voce Examiner - QuizVerse Major Project{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11 col-xl-10">
+
+        <!-- Viva Studio Header Banner -->
+        <div class="hero-card mb-4 p-4 p-md-5">
+            <div class="row align-items-center g-4">
+                <div class="col-md-8">
+                    <div class="hero-pill-badge mb-3">
+                        <span class="badge bg-danger text-white fw-bold rounded-pill">ORAL VIVA MODE</span>
+                        <span class="small fw-semibold"><i class="bi bi-mic-fill text-danger me-1"></i> Web Speech STT/TTS &amp; Google Gemini</span>
+                    </div>
+                    <h2 class="display-6 fw-extrabold mb-2">
+                        AI Oral Viva Voce &amp; Voice Examiner
+                    </h2>
+                    <p class="lead opacity-90 mb-0 small" style="max-width: 620px;">
+                        Experience an authentic university engineering oral defense. The AI professor speaks examination questions, listens to your spoken voice response in real time, and provides multi-tiered academic evaluation out of 10.
+                    </p>
+                </div>
+                <div class="col-md-4 text-center d-none d-md-block">
+                    <div class="hero-stats-box">
+                        <div class="display-6 fw-bold text-gradient mb-1">Viva Voce</div>
+                        <div class="small fw-bold text-uppercase text-muted">Oral Defense Engine</div>
+                        <hr class="my-2" style="border-color: var(--card-border);">
+                        <div class="small text-muted"><i class="bi bi-award-fill text-warning me-1"></i>10-Point Technical Rubric</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examination Session Configuration -->
+        <div class="quiz-card p-4 mb-4" id="vivaConfigCard">
+            <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-sliders2 text-primary"></i> Viva Voce Examination Parameters
+            </h5>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label small fw-bold text-muted text-uppercase">Subject / Domain Topic</label>
+                    <select class="form-select" id="vivaTopicSelect">
+                        <option value="Operating Systems">Operating Systems (Processes, Deadlocks, Memory)</option>
+                        <option value="Database Management Systems">Database Systems (ACID, Indexing, Transactions)</option>
+                        <option value="Computer Networks">Computer Networks (TCP/IP, OSI, Sockets, DNS)</option>
+                        <option value="Data Structures & Algorithms">Data Structures &amp; Complexity Analysis</option>
+                        <option value="Object Oriented Programming">Object-Oriented Architecture &amp; Design Patterns</option>
+                        <option value="Artificial Intelligence & ML">Artificial Intelligence &amp; Machine Learning</option>
+                        <option value="System Design & Cloud">Distributed Systems &amp; High Availability</option>
+                        <option value="custom">-- Custom Specialized Topic --</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4" id="customTopicCol" style="display: none;">
+                    <label class="form-label small fw-bold text-muted text-uppercase">Custom Topic Prompt</label>
+                    <input type="text" class="form-control" id="vivaCustomTopicInput" placeholder="e.g. Kubernetes Pod Lifecycle, Rust Ownership">
+                </div>
+
+                <div class="col-sm-6 col-md-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase">Rigor Level</label>
+                    <select class="form-select" id="vivaDifficultySelect">
+                        <option value="Easy">Foundational (Degree Core)</option>
+                        <option value="Medium" selected>Standard (University Midterm)</option>
+                        <option value="Hard">Rigorous (Honors / Senior Defense)</option>
+                    </select>
+                </div>
+
+                <div class="col-sm-6 col-md-4 mt-3">
+                    <button type="button" class="btn btn-gradient-primary w-100 py-2 rounded-pill fw-bold shadow" id="startVivaBtn" onclick="initiateVivaQuestion()">
+                        <i class="bi bi-play-circle-fill me-1"></i> Begin Oral Examination
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Oral Examination HUD -->
+        <div class="quiz-card p-4 mb-4" id="vivaExamHUD" style="display: none;">
+            <!-- Examiner Question Bar -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-3 border-bottom" style="border-color: var(--card-border) !important;">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="neu-icon-box text-primary p-2 rounded-circle" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; box-shadow: var(--neu-raised); background: var(--neu-surface);">
+                        <i class="bi bi-person-video3 fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-body">Lead Examiner Question</h6>
+                        <small class="text-muted" id="vivaCurrentTopicBadge">Topic: Operating Systems</small>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="neu-btn btn-sm px-3 py-2 rounded-pill small d-inline-flex align-items-center gap-2 text-primary" id="repeatSpeechBtn" onclick="speakQuestionAloud()">
+                        <i class="bi bi-volume-up-fill fs-5"></i> Speak Question Again
+                    </button>
+                    <button type="button" class="neu-btn btn-sm px-3 py-2 rounded-pill small text-secondary" onclick="initiateVivaQuestion()">
+                        <i class="bi bi-arrow-clockwise"></i> Next Question
+                    </button>
+                </div>
+            </div>
+
+            <!-- Animated Soundwave Equalizer when examiner speaks -->
+            <div class="p-4 rounded-4 mb-4 text-center" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                <div class="d-inline-flex align-items-center justify-content-center gap-1 mb-3" id="examinerAudioWave" style="height: 32px;">
+                    <span class="wave-bar" style="width: 4px; height: 12px; background: #6366f1; border-radius: 4px; display: inline-block;"></span>
+                    <span class="wave-bar" style="width: 4px; height: 24px; background: #8b5cf6; border-radius: 4px; display: inline-block;"></span>
+                    <span class="wave-bar" style="width: 4px; height: 16px; background: #6366f1; border-radius: 4px; display: inline-block;"></span>
+                    <span class="wave-bar" style="width: 4px; height: 28px; background: #ec4899; border-radius: 4px; display: inline-block;"></span>
+                    <span class="wave-bar" style="width: 4px; height: 10px; background: #8b5cf6; border-radius: 4px; display: inline-block;"></span>
+                </div>
+                <h4 class="fw-bold text-body mb-2" id="vivaQuestionPrompt">Loading viva question...</h4>
+                <div class="small text-muted fst-italic" id="vivaExaminerClue"></div>
+            </div>
+
+            <!-- Student Voice Recording HUD -->
+            <div class="quiz-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-mic-fill text-danger"></i> Candidate Spoken Defense
+                    </h6>
+                    <span class="badge bg-secondary-subtle text-secondary px-3 py-1 rounded-pill small font-mono" id="micStatusBadge">
+                        Mic: Idle
+                    </span>
+                </div>
+
+                <div class="text-center py-3">
+                    <button type="button" id="toggleRecordBtn" class="btn btn-danger btn-lg rounded-circle shadow-lg p-0" 
+                            style="width: 76px; height: 76px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.25s;" 
+                            onclick="toggleSpeechRecording()">
+                        <i class="bi bi-mic-fill fs-2" id="recordIcon"></i>
+                    </button>
+                    <div class="small fw-bold text-muted mt-2" id="recordHelperText">Click to Speak Your Defense</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase">Spoken Speech Transcript (Live Web Speech Transcription)</label>
+                    <textarea class="form-control" id="spokenTranscriptArea" rows="4" 
+                              placeholder="Your spoken response will appear here in real time as you speak. You can also manually type or edit here if you prefer typing." 
+                              style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border); color: var(--text-primary);"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="neu-btn px-4 py-2 rounded-pill fw-bold text-secondary" onclick="clearTranscript()">
+                        <i class="bi bi-eraser me-1"></i> Clear
+                    </button>
+                    <button type="button" class="btn btn-gradient-primary px-4 py-2 rounded-pill fw-bold shadow" id="submitVivaDefenseBtn" onclick="submitVivaEvaluation()">
+                        <i class="bi bi-check2-circle me-1"></i> Submit Defense for AI Scoring
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Gemini Evaluation Results Card -->
+            <div class="quiz-card p-4 p-md-5 mt-4" id="vivaEvaluationResultCard" style="display: none;">
+                <div class="row align-items-center g-4 mb-4 pb-3 border-bottom" style="border-color: var(--card-border) !important;">
+                    <div class="col-md-3 text-center">
+                        <div class="d-inline-flex flex-column align-items-center justify-content-center p-3 rounded-circle" 
+                             style="width: 120px; height: 120px; background: var(--neu-surface); box-shadow: var(--neu-raised); border: 3px solid #6366f1;">
+                            <span class="display-5 fw-bold text-primary font-mono mb-0" id="vivaScoreVal">9</span>
+                            <span class="small fw-bold text-muted text-uppercase" style="font-size: 0.7rem;">Out of 10</span>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-success px-3 py-1 rounded-pill fw-bold" id="vivaTierBadge">Outstanding</span>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 rounded-pill small">Oral Defense Result</span>
+                        </div>
+                        <h4 class="fw-bold mb-1">Examiner Assessment</h4>
+                        <p class="text-body small mb-0" id="vivaFeedbackText">Detailed assessment will appear here.</p>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-4 h-100" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                            <h6 class="fw-bold text-warning d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Missing Terminology &amp; Nuances
+                            </h6>
+                            <p class="small text-muted mb-0" id="vivaMissingPointsText">None</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-4 h-100" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                            <h6 class="fw-bold text-primary d-flex align-items-center gap-2 mb-2">
+                                <i class="bi bi-patch-question-fill"></i> Examiner's Follow-up Challenge
+                            </h6>
+                            <p class="small text-body fw-semibold mb-2" id="vivaFollowUpText">Follow-up question will appear here.</p>
+                            <button type="button" class="neu-btn btn-sm px-3 py-1 rounded-pill small text-primary" onclick="acceptFollowUpQuestion()">
+                                <i class="bi bi-arrow-right-circle me-1"></i> Defend Follow-up Question
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-outline-primary px-4 py-2 rounded-pill fw-bold" onclick="speakEvaluationAloud()">
+                        <i class="bi bi-volume-up-fill me-1"></i> Hear Examiner Feedback
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let activeQuestionObj = null;
+    let recognition = null;
+    let isRecording = false;
+
+    // Toggle custom topic input
+    document.getElementById('vivaTopicSelect').addEventListener('change', function() {
+        const customCol = document.getElementById('customTopicCol');
+        if (this.value === 'custom') {
+            customCol.style.display = 'block';
+        } else {
+            customCol.style.display = 'none';
+        }
+    });
+
+    // Check Web Speech Recognition support
+    window.addEventListener('DOMContentLoaded', () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = (event) => {
+                let interim = '';
+                let finalTranscript = '';
+                for (let i = 0; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    } else {
+                        interim += event.results[i][0].transcript;
+                    }
+                }
+                const transcriptArea = document.getElementById('spokenTranscriptArea');
+                transcriptArea.value = (finalTranscript + interim).trim();
+            };
+
+            recognition.onerror = (event) => {
+                console.warn('Speech recognition error:', event.error);
+                stopSpeechRecording();
+            };
+
+            recognition.onend = () => {
+                if (isRecording) {
+                    recognition.start();
+                } else {
+                    stopSpeechRecording();
+                }
+            };
+        } else {
+            const badge = document.getElementById('micStatusBadge');
+            badge.textContent = 'Speech STT Not Supported in Browser (Typing Supported)';
+            badge.className = 'badge bg-warning text-dark px-3 py-1 rounded-pill small';
+        }
+    });
+
+    async function initiateVivaQuestion() {
+        const topicSelect = document.getElementById('vivaTopicSelect').value;
+        const customInput = document.getElementById('vivaCustomTopicInput').value.trim();
+        const difficulty = document.getElementById('vivaDifficultySelect').value;
+
+        const topic = (topicSelect === 'custom' && customInput) ? customInput : topicSelect;
+
+        document.getElementById('startVivaBtn').innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Preparing Oral Question...';
+        document.getElementById('startVivaBtn').disabled = true;
+
+        try {
+            const resp = await fetch('/api/viva/generate-question', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic: topic, difficulty: difficulty })
+            });
+            const data = await resp.json();
+            activeQuestionObj = data;
+
+            document.getElementById('vivaExamHUD').style.display = 'block';
+            document.getElementById('vivaCurrentTopicBadge').textContent = `Topic: ${data.topic} • Rigor: ${data.difficulty}`;
+            document.getElementById('vivaQuestionPrompt').textContent = data.question;
+            document.getElementById('vivaExaminerClue').textContent = data.examiner_hint ? `Examiner Clue: ${data.examiner_hint}` : '';
+
+            // Reset recording & results
+            clearTranscript();
+            document.getElementById('vivaEvaluationResultCard').style.display = 'none';
+
+            // Speak question automatically
+            speakQuestionAloud();
+        } catch (err) {
+            console.error('Error generating viva question:', err);
+            alert('Failed to synthesize viva question. Please retry.');
+        } finally {
+            document.getElementById('startVivaBtn').innerHTML = '<i class="bi bi-play-circle-fill me-1"></i> Begin Oral Examination';
+            document.getElementById('startVivaBtn').disabled = false;
+        }
+    }
+
+    function speakQuestionAloud() {
+        if (!activeQuestionObj || !window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(activeQuestionObj.question);
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
+
+        const wave = document.getElementById('examinerAudioWave');
+        wave.style.opacity = '1';
+
+        utterance.onend = () => {
+            wave.style.opacity = '0.4';
+        };
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function toggleSpeechRecording() {
+        if (!recognition) {
+            alert('Your browser does not natively support Web Speech Recognition. You can type your answer directly into the defense box below!');
+            return;
+        }
+
+        if (isRecording) {
+            stopSpeechRecording();
+        } else {
+            startSpeechRecording();
+        }
+    }
+
+    function startSpeechRecording() {
+        try {
+            recognition.start();
+            isRecording = true;
+            document.getElementById('recordIcon').className = 'bi bi-stop-fill fs-2';
+            document.getElementById('toggleRecordBtn').className = 'btn btn-warning btn-lg rounded-circle shadow-lg p-0 animate-pulse';
+            document.getElementById('recordHelperText').textContent = 'Listening... Click to Finish Speaking';
+            document.getElementById('micStatusBadge').textContent = 'Recording Audio...';
+            document.getElementById('micStatusBadge').className = 'badge bg-danger px-3 py-1 rounded-pill small font-mono animate-pulse';
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function stopSpeechRecording() {
+        isRecording = false;
+        try { recognition.stop(); } catch(e){}
+        document.getElementById('recordIcon').className = 'bi bi-mic-fill fs-2';
+        document.getElementById('toggleRecordBtn').className = 'btn btn-danger btn-lg rounded-circle shadow-lg p-0';
+        document.getElementById('recordHelperText').textContent = 'Click to Speak Your Defense';
+        document.getElementById('micStatusBadge').textContent = 'Mic: Idle';
+        document.getElementById('micStatusBadge').className = 'badge bg-secondary-subtle text-secondary px-3 py-1 rounded-pill small font-mono';
+    }
+
+    function clearTranscript() {
+        document.getElementById('spokenTranscriptArea').value = '';
+    }
+
+    async function submitVivaEvaluation() {
+        const speech = document.getElementById('spokenTranscriptArea').value.trim();
+        if (!speech) {
+            alert('Please speak or type your oral defense answer before submitting for evaluation.');
+            return;
+        }
+
+        if (isRecording) {
+            stopSpeechRecording();
+        }
+
+        const btn = document.getElementById('submitVivaDefenseBtn');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Evaluating Defense...';
+        btn.disabled = true;
+
+        try {
+            const resp = await fetch('/api/viva/evaluate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    topic: activeQuestionObj.topic,
+                    question: activeQuestionObj.question,
+                    student_speech: speech,
+                    difficulty: activeQuestionObj.difficulty
+                })
+            });
+            const evalData = await resp.json();
+
+            document.getElementById('vivaScoreVal').textContent = evalData.score || '8';
+            document.getElementById('vivaTierBadge').textContent = evalData.performance_tier || 'Proficient';
+            document.getElementById('vivaFeedbackText').textContent = evalData.feedback || '';
+            document.getElementById('vivaMissingPointsText').textContent = evalData.missing_points || 'None';
+            document.getElementById('vivaFollowUpText').textContent = evalData.follow_up_question || 'No follow-up required.';
+
+            document.getElementById('vivaEvaluationResultCard').style.display = 'block';
+            document.getElementById('vivaEvaluationResultCard').scrollIntoView({ behavior: 'smooth' });
+        } catch (err) {
+            console.error('Evaluation error:', err);
+            alert('Failed to evaluate viva defense. Please try again.');
+        } finally {
+            btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Submit Defense for AI Scoring';
+            btn.disabled = false;
+        }
+    }
+
+    function acceptFollowUpQuestion() {
+        const followUp = document.getElementById('vivaFollowUpText').textContent;
+        if (!followUp) return;
+
+        activeQuestionObj.question = followUp;
+        document.getElementById('vivaQuestionPrompt').textContent = followUp;
+        document.getElementById('vivaExaminerClue').textContent = 'Follow-up viva probing conceptual depth.';
+        clearTranscript();
+        document.getElementById('vivaEvaluationResultCard').style.display = 'none';
+        speakQuestionAloud();
+        document.getElementById('vivaQuestionPrompt').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function speakEvaluationAloud() {
+        if (!window.speechSynthesis) return;
+        const feedback = document.getElementById('vivaFeedbackText').textContent;
+        const score = document.getElementById('vivaScoreVal').textContent;
+        const utterance = new SpeechSynthesisUtterance(`Your viva defense was scored ${score} out of 10. ${feedback}`);
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+    }
+</script>
+{% endblock %}

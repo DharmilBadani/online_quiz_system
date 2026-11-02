@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - QuizVerse Major Project{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-7 col-lg-5">
+        
+        <div class="glass-panel-elevated p-4 p-md-5">
+            <div class="text-center mb-4">
+                <div class="brand-icon-wrapper mx-auto mb-3" style="width: 58px; height: 58px; font-size: 1.85rem;">
+                    <i class="bi bi-shield-lock-fill text-primary"></i>
+                </div>
+                <h3 class="fw-extrabold mb-1">Welcome Back</h3>
+                <p class="text-muted small">Sign in to your Academic Assessment Portal</p>
+            </div>
+
+            <!-- Role Persona Quick Selector (1-Click Fill) -->
+            <div class="p-3 mb-4 rounded-4" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="small fw-bold text-muted text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-key-fill text-warning me-1"></i> Quick Demo Logins:
+                    </span>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill small" style="font-size: 0.65rem;">1-Click</span>
+                </div>
+                <div class="row g-2">
+                    <div class="col-4">
+                        <button type="button" class="role-fastpass-card student-pass w-100 p-2 text-center justify-content-center" onclick="fillCredentials('student', 'student123', 'student')">
+                            <div>
+                                <span class="beacon-pulse beacon-student mb-1 d-block mx-auto"></span>
+                                <span class="small fw-bold text-primary d-block">Student</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button type="button" class="role-fastpass-card faculty-pass w-100 p-2 text-center justify-content-center" onclick="fillCredentials('faculty', 'faculty123', 'faculty')">
+                            <div>
+                                <span class="beacon-pulse beacon-faculty mb-1 d-block mx-auto"></span>
+                                <span class="small fw-bold text-success d-block">Faculty</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button type="button" class="role-fastpass-card admin-pass w-100 p-2 text-center justify-content-center" onclick="fillCredentials('admin', 'admin123', 'admin')">
+                            <div>
+                                <span class="beacon-pulse beacon-admin mb-1 d-block mx-auto"></span>
+                                <span class="small fw-bold text-warning d-block">Admin</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <form action="{{ url_for('login', next=request.args.get('next', '')) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+                <div class="mb-3">
+                    <label for="usernameInput" class="form-label small fw-bold text-muted text-uppercase">Username or Institutional Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text border-0 text-muted" style="background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                            <i class="bi bi-person-fill"></i>
+                        </span>
+                        <input type="text" class="form-control" id="usernameInput" name="username" placeholder="e.g. student or faculty" required autofocus>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="passwordInput" class="form-label small fw-bold text-muted text-uppercase">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text border-0 text-muted" style="background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                            <i class="bi bi-key-fill"></i>
+                        </span>
+                        <input type="password" class="form-control" id="passwordInput" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-gradient-primary w-100 py-3 rounded-pill fw-bold mb-3 shadow-sm d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-box-arrow-in-right fs-5"></i>
+                    <span>Authenticate &amp; Access Dashboard</span>
+                </button>
+            </form>
+
+            <div class="text-center pt-2 border-top" style="border-color: var(--card-border) !important;">
+                <p class="small text-muted mb-0">
+                    Don't have an institutional account? 
+                    <a href="{{ url_for('register') }}" class="fw-bold text-primary text-decoration-none ms-1">Register Here</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function fillCredentials(u, p, role) {
+        document.getElementById('usernameInput').value = u;
+        document.getElementById('passwordInput').value = p;
+        if (typeof SoundFX !== 'undefined') SoundFX.select();
+    }
+</script>
+{% endblock %}

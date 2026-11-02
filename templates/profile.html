@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile &amp; Performance - QuizVerse{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11 col-xl-10">
+
+        <!-- User Profile Header Card -->
+        <div class="quiz-card p-4 p-md-5 mb-4">
+            <div class="row align-items-center g-4">
+                <div class="col-md-auto text-center">
+                    <div class="rounded-circle shadow-lg mx-auto d-flex align-items-center justify-content-center text-white display-5 fw-bold"
+                         style="width: 90px; height: 90px; background: {{ user.avatar_color|default('var(--primary-gradient)') }}; box-shadow: var(--neu-flat);">
+                        {{ (user.username[0]|upper) if user else 'C' }}
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <h2 class="fw-bold mb-0">{{ user.full_name if user else (session.get('candidate_name', 'Guest Candidate')) }}</h2>
+                        <span class="badge bg-primary px-3 py-1 rounded-pill fw-bold text-uppercase" style="font-size: 0.75rem;">
+                            {{ (user.role|capitalize) if user else 'Candidate' }}
+                        </span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill small fw-semibold">
+                            <i class="bi bi-shield-check me-1"></i> Verified Account
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-2">
+                        <i class="bi bi-envelope me-1"></i> {{ user.email if user else 'guest@session.local' }} &bull;
+                        <i class="bi bi-calendar-event me-1"></i> Registered Member Since 2026
+                    </p>
+                    <div class="d-flex flex-wrap gap-2 pt-1">
+                        <span class="neu-btn px-3 py-1 small">
+                            <i class="bi bi-mortarboard me-1 text-primary"></i> Level: <strong>{{ analytics.mastery_level }}</strong>
+                        </span>
+                        <span class="neu-btn px-3 py-1 small">
+                            <i class="bi bi-shield-lock me-1 text-success"></i> Trust Score: <strong>{{ analytics.trust_average }}%</strong>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-auto text-md-end">
+                    <a href="{{ url_for('quiz') }}" class="btn btn-gradient-primary px-4 py-2 rounded-pill fw-bold shadow-sm">
+                        <i class="bi bi-play-circle-fill me-1"></i> Launch Assessment
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Cognitive Performance KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Total Attempts</span>
+                        <i class="bi bi-clock-history fs-4 text-primary"></i>
+                    </div>
+                    <div class="stat-number text-primary">{{ analytics.total_attempts }}</div>
+                    <div class="small text-muted">Exams &amp; Focused Topic Drills</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Average Accuracy</span>
+                        <i class="bi bi-bullseye fs-4 text-success"></i>
+                    </div>
+                    <div class="stat-number text-success">{{ analytics.avg_accuracy }}%</div>
+                    <div class="small text-muted">Across all evaluated topics</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-box">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Integrity Trust Index</span>
+                        <i class="bi bi-shield-shaded fs-4 text-info"></i>
+                    </div>
+                    <div class="stat-number text-info">{{ analytics.trust_average }}%</div>
+                    <div class="small text-muted">AI Proctoring verified</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Attempts History Table -->
+        <div class="quiz-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-journal-text text-primary me-2"></i> Assessment History &amp; Score Log
+                </h5>
+                {% if user and user.role in ['faculty', 'admin'] %}
+                <a href="{{ url_for('faculty_studio') }}" class="neu-btn px-3 py-1 small">
+                    <i class="bi bi-gear-fill me-1"></i> Faculty Studio
+                </a>
+                {% else %}
+                <button type="button" class="neu-btn px-3 py-1 small" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i> Print / Export Report
+                </button>
+                {% endif %}
+            </div>
+
+            {% if attempts %}
+            <div class="table-responsive">
+                <table class="neu-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Sub-Topic</th>
+                            <th>Score</th>
+                            <th>Accuracy</th>
+                            <th>Grade</th>
+                            <th>Pace Rating</th>
+                            <th>Trust Score</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for att in attempts %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1 rounded-pill">
+                                    {{ att['category'] }}
+                                </span>
+                            </td>
+                            <td class="fw-semibold small text-body">{{ att['topic'] }}</td>
+                            <td class="font-mono fw-bold">{{ att['score'] }} / {{ att['total_questions'] }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 6px; min-width: 60px;">
+                                        <div class="progress-bar bg-primary" style="width: {{ att['percentage'] }}%;"></div>
+                                    </div>
+                                    <span class="font-mono small fw-bold">{{ att['percentage'] }}%</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-dark border border-secondary px-2 py-1 rounded-pill">
+                                    {{ att['grade'] }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="small text-muted">{{ att['speed_rating'] }}</span>
+                            </td>
+                            <td>
+                                <span class="badge {% if att.get('trust_score', 100) >= 90 %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %} border rounded-pill px-2 py-1 font-mono small">
+                                    {{ att.get('trust_score', 100) }}%
+                                </span>
+                            </td>
+                            <td class="small text-muted">{{ att['timestamp'][:16] if att['timestamp'] else 'Recent' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted opacity-50 d-block mb-2"></i>
+                <h6 class="fw-bold">No Examination Attempts Yet</h6>
+                <p class="text-muted small">Complete your first drill or exam to generate cognitive telemetry.</p>
+                <a href="{{ url_for('quiz') }}" class="btn btn-gradient-primary btn-sm px-4 py-2 rounded-pill mt-2">Start Quiz Now</a>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

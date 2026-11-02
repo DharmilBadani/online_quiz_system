@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Authoring Studio - QuizVerse Major Project{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-12 col-xl-11">
+
+        <!-- Faculty Studio Header with Emerald/Teal Academic Theme -->
+        <div class="hero-card hero-faculty mb-4 p-4 p-md-5">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <div class="hero-pill-badge mb-2">
+                        <span class="role-pill faculty">
+                            <span class="beacon-pulse beacon-faculty"></span> FACULTY PORTAL
+                        </span>
+                        <span class="small fw-semibold ms-1"><i class="bi bi-mortarboard-fill text-success me-1"></i> Exam Controller &amp; Question Studio</span>
+                    </div>
+                    <h2 class="display-6 fw-extrabold mb-1">
+                        Academic Question Authoring &amp; Student Telemetry
+                    </h2>
+                    <p class="lead opacity-90 mb-0 small" style="max-width: 620px;">
+                        Curate dynamic questions, author custom technical questions with LaTeX formulas, and inspect automated AI proctoring telemetry.
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('export_attempts_csv') }}" class="btn btn-gradient-primary px-4 py-2 rounded-pill fw-bold shadow-sm" style="background: var(--role-faculty-gradient);">
+                        <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> Export Student CSV
+                    </a>
+                    <a href="{{ url_for('ai_generator') }}" class="neu-btn px-4 py-2 rounded-pill fw-bold">
+                        <i class="bi bi-stars text-warning me-1"></i> AI Synthesizer
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Faculty KPI Telemetry Ribbon -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-faculty">
+                    <div class="kpi-orb kpi-orb-faculty">
+                        <i class="bi bi-journal-code"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Question Bank</div>
+                        <div class="kpi-value text-success">{{ total_q }}</div>
+                        <div class="kpi-desc">Across {{ cat_stats|length }} Disciplines</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-faculty">
+                    <div class="kpi-orb kpi-orb-faculty">
+                        <i class="bi bi-check-all"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Audited Attempts</div>
+                        <div class="kpi-value text-primary">{{ student_attempts|length }}</div>
+                        <div class="kpi-desc">Recent verified submissions</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-faculty">
+                    <div class="kpi-orb kpi-orb-danger">
+                        <i class="bi bi-shield-exclamation"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">Proctor Flags</div>
+                        <div class="kpi-value text-danger">{{ proctor_logs|length }}</div>
+                        <div class="kpi-desc">Telemetry violations logged</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="kpi-metric-card role-card-faculty">
+                    <div class="kpi-orb kpi-orb-cyan">
+                        <i class="bi bi-patch-check-fill"></i>
+                    </div>
+                    <div>
+                        <div class="kpi-title">System Integrity</div>
+                        <div class="kpi-value text-info">98.4%</div>
+                        <div class="kpi-desc">Zero leakage index</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Question Authoring Form & Live Syntax Monitor -->
+        <div class="quiz-card role-card-faculty p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
+                    <i class="bi bi-pencil-square text-success"></i> Author New Examination Question
+                </h5>
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 small">
+                    <i class="bi bi-mortarboard-fill me-1"></i> Academic Question Curator
+                </span>
+            </div>
+
+            <form action="{{ url_for('add_custom_question') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label for="newCategory" class="form-label small fw-bold text-muted text-uppercase">Academic Subject</label>
+                        <select class="form-select" id="newCategory" name="category" required onchange="updateAuthorPreview()">
+                            {% for ckey, cinfo in subject_catalog.items() %}
+                            <option value="{{ ckey }}">{{ cinfo['title'] }} ({{ ckey }})</option>
+                            {% endfor %}
+                            <option value="Advanced AI">Advanced AI &amp; Machine Learning</option>
+                            <option value="Cybersecurity">Cybersecurity &amp; Cryptography</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="newTopic" class="form-label small fw-bold text-muted text-uppercase">Sub-Topic Module</label>
+                        <input type="text" class="form-control" id="newTopic" name="topic" placeholder="e.g. Memory Management or SQL Joins" required oninput="updateAuthorPreview()">
+                    </div>
+
+                    <div class="col-sm-6 col-md-2">
+                        <label for="newDifficulty" class="form-label small fw-bold text-muted text-uppercase">Difficulty</label>
+                        <select class="form-select" id="newDifficulty" name="difficulty" onchange="updateAuthorPreview()">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <div class="col-sm-6 col-md-2">
+                        <label for="newBloom" class="form-label small fw-bold text-muted text-uppercase">Bloom's Level</label>
+                        <select class="form-select" id="newBloom" name="bloom_level" onchange="updateAuthorPreview()">
+                            <option value="Remembering">Remembering</option>
+                            <option value="Understanding" selected>Understanding</option>
+                            <option value="Applying">Applying</option>
+                            <option value="Analyzing">Analyzing</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="newQuestionText" class="form-label small fw-bold text-muted text-uppercase">Question Stem</label>
+                    <textarea class="form-control" id="newQuestionText" name="question" rows="2" placeholder="Formulate the examination question..." required oninput="updateAuthorPreview()"></textarea>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Option A</label>
+                        <input type="text" class="form-control" id="optA" name="option_a" placeholder="First candidate answer" required oninput="updateAuthorPreview()">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Option B</label>
+                        <input type="text" class="form-control" id="optB" name="option_b" placeholder="Second candidate answer" required oninput="updateAuthorPreview()">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Option C</label>
+                        <input type="text" class="form-control" id="optC" name="option_c" placeholder="Third candidate answer" required oninput="updateAuthorPreview()">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Option D</label>
+                        <input type="text" class="form-control" id="optD" name="option_d" placeholder="Fourth candidate answer" required oninput="updateAuthorPreview()">
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label for="newCorrect" class="form-label small fw-bold text-muted text-uppercase">Correct Option Key</label>
+                        <select class="form-select fw-bold text-success" id="newCorrect" name="correct_answer" onchange="updateAuthorPreview()">
+                            <option value="A">Option A</option>
+                            <option value="B">Option B</option>
+                            <option value="C">Option C</option>
+                            <option value="D">Option D</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label for="newExplanation" class="form-label small fw-bold text-muted text-uppercase">Pedagogical Explanation / Solution Note</label>
+                        <input type="text" class="form-control" id="newExplanation" name="explanation" placeholder="Provide step-by-step reasoning shown to student upon submission..." oninput="updateAuthorPreview()">
+                    </div>
+                </div>
+
+                <!-- Live Question Syntax Preview Terminal -->
+                <div class="mb-4">
+                    <div class="small fw-bold text-muted text-uppercase mb-2">
+                        <i class="bi bi-display me-1 text-info"></i> Candidate View Real-Time Syntax Monitor
+                    </div>
+                    <div class="syntax-monitor">
+                        <div class="syntax-monitor-bar">
+                            <div class="monitor-dots">
+                                <span class="monitor-dot red"></span>
+                                <span class="monitor-dot yellow"></span>
+                                <span class="monitor-dot green"></span>
+                            </div>
+                            <span class="small font-mono text-muted" id="previewCategoryBadge">Java Programming &bull; Core Logic</span>
+                        </div>
+                        <div class="syntax-monitor-body" id="previewMonitorContent">
+                            <div class="fw-bold mb-2 text-warning" id="previewQText">Q1: Formulate your question above to inspect real-time rendering...</div>
+                            <div class="small opacity-75 ps-2">
+                                <div>[A] <span id="prevA">Option A text</span></div>
+                                <div>[B] <span id="prevB">Option B text</span></div>
+                                <div>[C] <span id="prevC">Option C text</span></div>
+                                <div>[D] <span id="prevD">Option D text</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-gradient-primary px-4 py-2 rounded-pill fw-bold shadow-sm" style="background: var(--role-faculty-gradient);">
+                        <i class="bi bi-plus-circle-fill me-1"></i> Author &amp; Save Question to Bank
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Curated Question Bank & Search Filters -->
+        <div class="quiz-card role-card-faculty p-4 mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-collection text-primary"></i> Question Bank Repository
+                    </h5>
+                    <p class="text-muted small mb-0">Browse, filter, and audit curriculum items currently active in examination pools.</p>
+                </div>
+                <span class="badge bg-primary-subtle text-primary border rounded-pill px-3 py-1 small">
+                    {{ recent_questions|length }} Items Displayed
+                </span>
+            </div>
+
+            <!-- Filter Toolbar -->
+            <form method="GET" action="{{ url_for('faculty_studio') }}" class="row g-2 mb-3 p-3 rounded-3" style="background: var(--neu-surface); border: var(--neu-border);">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Search questions or topics..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="category" class="form-select form-select-sm">
+                        <option value="All" {% if not category_filter or category_filter == 'All' %}selected{% endif %}>All Subjects</option>
+                        {% for ckey, cinfo in subject_catalog.items() %}
+                        <option value="{{ ckey }}" {% if category_filter == ckey %}selected{% endif %}>{{ cinfo['title'] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="difficulty" class="form-select form-select-sm">
+                        <option value="All" {% if not difficulty_filter or difficulty_filter == 'All' %}selected{% endif %}>All Difficulties</option>
+                        <option value="Easy" {% if difficulty_filter == 'Easy' %}selected{% endif %}>Easy</option>
+                        <option value="Medium" {% if difficulty_filter == 'Medium' %}selected{% endif %}>Medium</option>
+                        <option value="Hard" {% if difficulty_filter == 'Hard' %}selected{% endif %}>Hard</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-primary flex-grow-1">Filter</button>
+                    <a href="{{ url_for('faculty_studio') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+
+            {% if recent_questions %}
+            <div class="table-responsive">
+                <table class="neu-table table align-middle" style="color: var(--text-primary);">
+                    <thead>
+                        <tr class="text-muted small text-uppercase" style="border-color: var(--card-border);">
+                            <th style="width: 50%;">Question</th>
+                            <th>Subject</th>
+                            <th>Topic</th>
+                            <th>Difficulty</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for q in recent_questions %}
+                        <tr style="border-color: var(--card-border);">
+                            <td class="fw-semibold small text-break">
+                                #{{ q['id'] }} &bull; {{ q['question'] }}
+                            </td>
+                            <td><span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1 small">{{ q['category'] }}</span></td>
+                            <td class="small text-muted">{{ q['topic'] or 'Core' }}</td>
+                            <td>
+                                <span class="badge {% if q['difficulty'] == 'Hard' %}bg-danger-subtle text-danger{% elif q['difficulty'] == 'Medium' %}bg-warning-subtle text-warning{% else %}bg-success-subtle text-success{% endif %} border rounded-pill px-2 py-1 small">
+                                    {{ q['difficulty'] }}
+                                </span>
+                            </td>
+                            <td>
+                                <form action="{{ url_for('delete_question', question_id=q['id']) }}" method="POST" onsubmit="return confirm('Remove question #{{ q['id'] }} from active question bank?');" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2 rounded-pill small" title="Delete Question">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted small mb-0 py-3 text-center">
+                <i class="bi bi-search fs-3 text-muted d-block mb-1"></i>
+                No questions found matching your filter criteria.
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Student Exam Audit & Telemetry Log Table -->
+        <div class="quiz-card role-card-faculty p-4 mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-shield-check text-success"></i> Student Submissions &amp; Anti-Cheating Telemetry
+                    </h5>
+                    <p class="text-muted small mb-0">Verified audit trail of student examination submissions and integrity indices.</p>
+                </div>
+                <a href="{{ url_for('export_attempts_csv') }}" class="neu-btn px-3 py-1 small">
+                    <i class="bi bi-download me-1 text-success"></i> Export All Records (CSV)
+                </a>
+            </div>
+
+            {% if student_attempts %}
+            <div class="table-responsive">
+                <table class="neu-table table align-middle" style="color: var(--text-primary);">
+                    <thead>
+                        <tr class="text-muted small text-uppercase" style="border-color: var(--card-border);">
+                            <th>Candidate</th>
+                            <th>Subject</th>
+                            <th>Sub-Topic</th>
+                            <th>Score</th>
+                            <th>Grade</th>
+                            <th>Duration</th>
+                            <th>Trust Score</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for att in student_attempts %}
+                        <tr style="border-color: var(--card-border);">
+                            <td class="fw-bold">
+                                <i class="bi bi-person-circle text-primary me-1"></i>{{ att['candidate_name'] }}
+                            </td>
+                            <td><span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1">{{ att['category'] }}</span></td>
+                            <td class="small text-muted">{{ att['topic'] }}</td>
+                            <td class="font-mono fw-bold">{{ att['score'] }} / {{ att['total_questions'] }} ({{ att['percentage'] }}%)</td>
+                            <td><span class="badge bg-dark border border-secondary rounded-pill px-2 py-1">{{ att['grade'] }}</span></td>
+                            <td class="small font-mono">{{ att['time_taken_seconds'] }}s</td>
+                            <td>
+                                <span class="badge {% if att.get('trust_score', 100) >= 90 %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %} border rounded-pill px-2 py-1 font-mono">
+                                    {{ att.get('trust_score', 100) }}%
+                                </span>
+                            </td>
+                            <td class="small text-muted font-mono">{{ att['timestamp'][:16] if att['timestamp'] else 'Recent' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted small mb-0 py-3 text-center">
+                <i class="bi bi-inbox fs-3 text-muted d-block mb-1"></i>
+                No student submission logs recorded yet.
+            </p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function updateAuthorPreview() {
+        const cat = document.getElementById('newCategory')?.value || 'Category';
+        const topic = document.getElementById('newTopic')?.value || 'Sub-Topic';
+        const q = document.getElementById('newQuestionText')?.value || 'Formulate your question above to inspect real-time rendering...';
+        const a = document.getElementById('optA')?.value || 'Option A text';
+        const b = document.getElementById('optB')?.value || 'Option B text';
+        const c = document.getElementById('optC')?.value || 'Option C text';
+        const d = document.getElementById('optD')?.value || 'Option D text';
+        const corr = document.getElementById('newCorrect')?.value || 'A';
+
+        const badgeEl = document.getElementById('previewCategoryBadge');
+        if (badgeEl) badgeEl.textContent = `${cat} • ${topic}`;
+
+        const qEl = document.getElementById('previewQText');
+        if (qEl) qEl.textContent = `Q1: ${q}`;
+
+        const setOpt = (id, key, val) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = key === corr 
+                ? `<strong class="text-success">${val} <i class="bi bi-check-circle-fill text-success ms-1"></i> (Correct Answer)</strong>` 
+                : val;
+        };
+        setOpt('prevA', 'A', a);
+        setOpt('prevB', 'B', b);
+        setOpt('prevC', 'C', c);
+        setOpt('prevD', 'D', d);
+    }
+</script>
+{% endblock %}

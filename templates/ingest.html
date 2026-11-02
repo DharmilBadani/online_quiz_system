@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Syllabus Ingest & AI Studio | QuizVerse{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb & Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Syllabus Ingestion</li>
+                </ol>
+            </nav>
+            <h1 class="h2 fw-bold text-body mb-1">
+                <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Smart Syllabus & Notes Ingestion
+            </h1>
+            <p class="text-muted small mb-0">
+                Upload university syllabi, PDFs, or lecture notes &bull; Google Gemini extracts core modules, generates 100% dynamic MCQs, and creates interactive flashcards.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('code_sandbox') }}" class="neu-btn px-3 py-2 text-decoration-none small">
+                <i class="bi bi-terminal me-1 text-info"></i> Code Sandbox
+            </a>
+            <a href="{{ url_for('index') }}" class="neu-btn px-3 py-2 text-decoration-none small">
+                <i class="bi bi-house me-1"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Ingestion Panel -->
+    <div class="row g-4">
+        <!-- Left: Upload & Input Form -->
+        <div class="col-lg-5">
+            <div class="neu-card p-4 h-100">
+                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-cloud-arrow-up-fill text-primary"></i> Document Upload
+                </h5>
+
+                <!-- Mode Switcher Tabs -->
+                <ul class="nav nav-pills nav-fill mb-3" id="ingestTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active small py-2" id="file-tab" data-bs-toggle="pill" data-bs-target="#filePanel" type="button" role="tab">
+                            <i class="bi bi-file-earmark-text me-1"></i> Upload File
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link small py-2" id="paste-tab" data-bs-toggle="pill" data-bs-target="#pastePanel" type="button" role="tab">
+                            <i class="bi bi-clipboard me-1"></i> Paste Notes
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content mb-4" id="ingestTabsContent">
+                    <!-- File Drag & Drop Panel -->
+                    <div class="tab-pane fade show active" id="filePanel" role="tabpanel">
+                        <div class="drop-zone p-4 text-center border-2 border-dashed rounded-4" id="dropZone"
+                             style="border: 2px dashed rgba(79, 70, 229, 0.4); background: var(--neu-surface); cursor: pointer;">
+                            <input type="file" id="fileInput" accept=".pdf,.txt,.md,.json" class="d-none">
+                            <i class="bi bi-file-earmark-arrow-up text-primary fs-1 mb-2 d-block"></i>
+                            <div class="fw-semibold text-body mb-1" id="fileLabel">Drag & drop syllabus PDF or text file here</div>
+                            <div class="small text-muted mb-2">Supports PDF, TXT, MD, JSON (Max 15MB)</div>
+                            <button type="button" class="neu-btn btn-sm px-3 py-1 text-primary rounded-pill" onclick="document.getElementById('fileInput').click()">
+                                <i class="bi bi-folder2-open me-1"></i> Browse Files
+                            </button>
+                        </div>
+                        <div id="selectedFileInfo" class="small text-success mt-2 d-none fw-semibold"></div>
+                    </div>
+
+                    <!-- Raw Text Paste Panel -->
+                    <div class="tab-pane fade" id="pastePanel" role="tabpanel">
+                        <textarea id="pastedText" class="form-control neu-input p-3 small font-mono" rows="8" 
+                                  placeholder="Paste course syllabus chapters, lecture bullet points, or assignment prompts here (e.g. Distributed Consensus, Paxos vs Raft, Byzantine Fault Tolerance)..."
+                                  style="resize: vertical;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Parameters -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <label class="form-label small text-muted fw-bold">Question Count</label>
+                        <select id="questionCount" class="form-select neu-input small">
+                            <option value="5" selected>5 High-Yield Questions</option>
+                            <option value="10">10 Comprehensive Questions</option>
+                            <option value="15">15 Full-Deck Questions</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small text-muted fw-bold">Target Rigor</label>
+                        <select id="difficultyLevel" class="form-select neu-input small">
+                            <option value="Easy">Easy (Foundational)</option>
+                            <option value="Medium" selected>Medium (Standard)</option>
+                            <option value="Hard">Hard (Engineering Mastery)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button type="button" id="synthesizeBtn" class="btn btn-primary w-100 py-3 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 shadow" onclick="triggerSyllabusIngestion()">
+                    <i class="bi bi-stars"></i> Synthesize Curriculum & Questions
+                </button>
+
+                <div id="ingestLoading" class="text-center py-3 d-none">
+                    <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                    <span class="small text-muted">Gemini is analyzing syllabus modules & synthesizing questions...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Results & Generated Flashcards -->
+        <div class="col-lg-7">
+            <div class="neu-card p-4 h-100 d-flex flex-column" id="outputContainer">
+                <div id="emptyState" class="text-center my-auto py-5">
+                    <i class="bi bi-journal-richtext text-muted opacity-50 display-1 mb-3 d-block"></i>
+                    <h5 class="fw-bold text-muted">No Curriculum Ingested Yet</h5>
+                    <p class="text-muted small mx-auto" style="max-width: 420px;">
+                        Upload a course syllabus or paste lecture notes on the left. Gemini will parse modules, build non-repeating MCQs, and generate 3D interactive flashcards.
+                    </p>
+                </div>
+
+                <div id="resultsContent" class="d-none flex-grow-1">
+                    <!-- Curriculum Overview Header -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3 pb-3 border-bottom">
+                        <div>
+                            <span class="badge bg-primary px-3 py-1 rounded-pill mb-1" id="resSubjectBadge">Subject</span>
+                            <h4 class="fw-bold text-body mb-1" id="resSubjectTitle">Course Name</h4>
+                            <p class="small text-muted mb-0" id="resSummary">Summary text</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="downloadFlashcardsJSON()">
+                                <i class="bi bi-download me-1"></i> Export Cards
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Core Modules Extracted -->
+                    <div class="mb-4">
+                        <small class="text-muted fw-bold text-uppercase d-block mb-2" style="font-size: 0.75rem;">Extracted Syllabus Modules</small>
+                        <div class="d-flex flex-wrap gap-2" id="resModulesList"></div>
+                    </div>
+
+                    <!-- Interactive Flashcard Carousel -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">
+                                <i class="bi bi-card-heading text-info me-1"></i> 3D Interactive Flashcards (Click to Flip)
+                            </small>
+                            <span class="badge bg-secondary-subtle text-secondary small rounded-pill" id="cardCounter">Card 1 / 4</span>
+                        </div>
+                        <div class="flashcard-wrapper position-relative" style="perspective: 1000px; min-height: 180px;">
+                            <div class="flashcard neu-card p-4 text-center d-flex flex-column justify-content-center align-items-center h-100 position-relative" 
+                                 id="activeFlashcard" onclick="flipFlashcard()" 
+                                 style="cursor: pointer; transition: transform 0.6s; transform-style: preserve-3d; min-height: 180px; border: 1px solid rgba(79, 70, 229, 0.2);">
+                                <div id="cardFront" class="w-100">
+                                    <span class="badge bg-primary-subtle text-primary mb-2 rounded-pill small">CONCEPT</span>
+                                    <h5 class="fw-bold text-body mb-2" id="cardFrontText">Concept</h5>
+                                    <small class="text-muted"><i class="bi bi-arrow-repeat me-1"></i>Click card to reveal deep explanation</small>
+                                </div>
+                                <div id="cardBack" class="w-100 d-none">
+                                    <span class="badge bg-success-subtle text-success mb-2 rounded-pill small">EXAM HOOK & EXPLANATION</span>
+                                    <p class="small text-body mb-2" id="cardBackText">Explanation</p>
+                                    <small class="text-muted"><i class="bi bi-arrow-repeat me-1"></i>Click to flip back</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center gap-2 mt-2">
+                            <button type="button" class="neu-btn btn-sm px-3 py-1 rounded-pill" onclick="prevFlashcard()">
+                                <i class="bi bi-chevron-left me-1"></i> Prev
+                            </button>
+                            <button type="button" class="neu-btn btn-sm px-3 py-1 rounded-pill" onclick="nextFlashcard()">
+                                Next <i class="bi bi-chevron-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Synthesized Questions Preview -->
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">
+                                <i class="bi bi-patch-question-fill text-warning me-1"></i> Synthesized Syllabus Questions (<span id="qCountBadge">0</span>)
+                            </small>
+                            <a href="{{ url_for('quiz') }}?category=AI+Studio&topic=Custom+Syllabus" class="btn btn-sm btn-gradient-primary rounded-pill px-3 fw-bold">
+                                <i class="bi bi-play-fill me-1"></i> Launch Quiz
+                            </a>
+                        </div>
+                        <div class="d-flex flex-column gap-3" id="questionsContainer" style="max-height: 380px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentSyllabusData = null;
+let currentFlashcardIndex = 0;
+let isFlipped = false;
+
+// Drag and drop file setup
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileInfo = document.getElementById('selectedFileInfo');
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = '#4f46e5';
+    dropZone.style.backgroundColor = 'rgba(79, 70, 229, 0.05)';
+});
+dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = 'rgba(79, 70, 229, 0.4)';
+    dropZone.style.backgroundColor = 'var(--neu-surface)';
+});
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'rgba(79, 70, 229, 0.4)';
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileSelect();
+    }
+});
+fileInput.addEventListener('change', handleFileSelect);
+
+function handleFileSelect() {
+    if (fileInput.files && fileInput.files[0]) {
+        const f = fileInput.files[0];
+        fileInfo.textContent = `Selected: ${f.name} (${Math.round(f.size / 1024)} KB)`;
+        fileInfo.classList.remove('d-none');
+    }
+}
+
+async function triggerSyllabusIngestion() {
+    const file = fileInput.files[0];
+    const pasted = document.getElementById('pastedText').value.trim();
+    const count = document.getElementById('questionCount').value;
+    const difficulty = document.getElementById('difficultyLevel').value;
+
+    if (!file && !pasted) {
+        alert("Please upload a syllabus file (.pdf, .txt) or paste lecture notes first.");
+        return;
+    }
+
+    const btn = document.getElementById('synthesizeBtn');
+    const loading = document.getElementById('ingestLoading');
+    btn.disabled = true;
+    loading.classList.remove('d-none');
+
+    const formData = new FormData();
+    if (file) formData.append('file', file);
+    if (pasted) formData.append('text_content', pasted);
+    formData.append('count', count);
+    formData.append('difficulty', difficulty);
+
+    try {
+        const resp = await fetch('/syllabus-ingest', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await resp.json();
+        btn.disabled = false;
+        loading.classList.add('d-none');
+
+        if (data.success) {
+            currentSyllabusData = data;
+            renderSyllabusResults(data);
+        } else {
+            alert(data.error || "Failed to process syllabus.");
+        }
+    } catch (err) {
+        btn.disabled = false;
+        loading.classList.add('d-none');
+        alert("Error communicating with AI engine: " + err.message);
+    }
+}
+
+function renderSyllabusResults(data) {
+    document.getElementById('emptyState').classList.add('d-none');
+    document.getElementById('resultsContent').classList.remove('d-none');
+
+    document.getElementById('resSubjectBadge').textContent = data.subject || "Custom Track";
+    document.getElementById('resSubjectTitle').textContent = data.subject || "Syllabus Curriculum";
+    document.getElementById('resSummary').textContent = data.summary || "";
+
+    // Modules
+    const modContainer = document.getElementById('resModulesList');
+    modContainer.innerHTML = '';
+    (data.modules || []).forEach(m => {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-info-subtle text-info border border-info-subtle px-3 py-2 rounded-pill small';
+        badge.innerHTML = `<i class="bi bi-bookmark-check me-1"></i>${m}`;
+        modContainer.appendChild(badge);
+    });
+
+    // Flashcards
+    currentFlashcardIndex = 0;
+    isFlipped = false;
+    updateFlashcardDisplay();
+
+    // Questions
+    const qContainer = document.getElementById('questionsContainer');
+    qContainer.innerHTML = '';
+    document.getElementById('qCountBadge').textContent = (data.questions || []).length;
+
+    (data.questions || []).forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = 'neu-card p-3 rounded-4';
+        card.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-primary text-white rounded-pill px-2 py-1 small">Question ${idx + 1}</span>
+                <span class="badge bg-secondary-subtle text-secondary rounded-pill small">${q.bloom_level || 'Applying'}</span>
+            </div>
+            <div class="fw-bold small text-body mb-2">${q.question}</div>
+            <div class="row g-1 small mb-2 font-mono">
+                <div class="col-6"><span class="badge bg-light text-dark me-1">A</span> ${q.option_a}</div>
+                <div class="col-6"><span class="badge bg-light text-dark me-1">B</span> ${q.option_b}</div>
+                <div class="col-6"><span class="badge bg-light text-dark me-1">C</span> ${q.option_c}</div>
+                <div class="col-6"><span class="badge bg-light text-dark me-1">D</span> ${q.option_d}</div>
+            </div>
+            <div class="alert alert-success py-2 px-3 mb-0 small rounded-3">
+                <strong>Correct: Option ${q.correct_answer}</strong> &bull; ${q.explanation}
+            </div>
+        `;
+        qContainer.appendChild(card);
+    });
+}
+
+function updateFlashcardDisplay() {
+    if (!currentSyllabusData || !currentSyllabusData.flashcards || !currentSyllabusData.flashcards.length) return;
+    const cards = currentSyllabusData.flashcards;
+    const card = cards[currentFlashcardIndex];
+    document.getElementById('cardCounter').textContent = `Card ${currentFlashcardIndex + 1} / ${cards.length}`;
+    document.getElementById('cardFrontText').textContent = card.concept;
+    document.getElementById('cardBackText').textContent = card.explanation;
+    
+    // reset to front
+    isFlipped = false;
+    document.getElementById('cardFront').classList.remove('d-none');
+    document.getElementById('cardBack').classList.add('d-none');
+}
+
+function flipFlashcard() {
+    isFlipped = !isFlipped;
+    if (isFlipped) {
+        document.getElementById('cardFront').classList.add('d-none');
+        document.getElementById('cardBack').classList.remove('d-none');
+    } else {
+        document.getElementById('cardFront').classList.remove('d-none');
+        document.getElementById('cardBack').classList.add('d-none');
+    }
+}
+
+function nextFlashcard() {
+    if (!currentSyllabusData || !currentSyllabusData.flashcards) return;
+    currentFlashcardIndex = (currentFlashcardIndex + 1) % currentSyllabusData.flashcards.length;
+    updateFlashcardDisplay();
+}
+
+function prevFlashcard() {
+    if (!currentSyllabusData || !currentSyllabusData.flashcards) return;
+    currentFlashcardIndex = (currentFlashcardIndex - 1 + currentSyllabusData.flashcards.length) % currentSyllabusData.flashcards.length;
+    updateFlashcardDisplay();
+}
+
+function downloadFlashcardsJSON() {
+    if (!currentSyllabusData) return;
+    const blob = new Blob([JSON.stringify(currentSyllabusData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(currentSyllabusData.subject || "syllabus").replace(/\s+/g, '_')}_study_pack.json`;
+    a.click();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - QuizVerse Major Project{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-8 col-lg-6">
+        
+        <div class="glass-panel-elevated p-4 p-md-5">
+            <div class="text-center mb-4">
+                <div class="brand-icon-wrapper mx-auto mb-3" style="width: 58px; height: 58px; font-size: 1.85rem;">
+                    <i class="bi bi-person-plus-fill text-primary"></i>
+                </div>
+                <h3 class="fw-extrabold mb-1">Create Account</h3>
+                <p class="text-muted small">Register for the Unified Academic Assessment &amp; AI Studio</p>
+            </div>
+
+            <form action="{{ url_for('register') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label for="usernameField" class="form-label small fw-bold text-muted text-uppercase">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 text-muted" style="background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                                <i class="bi bi-at"></i>
+                            </span>
+                            <input type="text" class="form-control" id="usernameField" name="username" placeholder="e.g. aryan_s" required>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="fullNameField" class="form-label small fw-bold text-muted text-uppercase">Full Legal Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 text-muted" style="background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                                <i class="bi bi-person-badge"></i>
+                            </span>
+                            <input type="text" class="form-control" id="fullNameField" name="full_name" placeholder="e.g. Aryan Sharma" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="emailField" class="form-label small fw-bold text-muted text-uppercase">Institutional Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text border-0 text-muted" style="background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                            <i class="bi bi-envelope-fill"></i>
+                        </span>
+                        <input type="email" class="form-control" id="emailField" name="email" placeholder="student@university.edu" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="regPassField" class="form-label small fw-bold text-muted text-uppercase">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text border-0 text-muted" style="background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                            <i class="bi bi-lock-fill"></i>
+                        </span>
+                        <input type="password" class="form-control" id="regPassField" name="password" placeholder="Create a secure password" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted text-uppercase d-block mb-2">Select Institutional Role</label>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="d-block cursor-pointer">
+                                <input type="radio" name="role" value="student" class="d-none" id="roleStudent" checked onchange="updateRoleUI()">
+                                <div class="glass-panel p-3 text-center role-card-student" id="cardRoleStudent" style="cursor: pointer; border-color: var(--role-student-primary); box-shadow: 0 0 16px var(--role-student-glow);">
+                                    <span class="beacon-pulse beacon-student mb-2 d-inline-block"></span>
+                                    <i class="bi bi-mortarboard-fill fs-3 text-primary d-block mb-1"></i>
+                                    <span class="fw-bold small d-block">Student</span>
+                                    <span class="text-muted" style="font-size: 0.72rem;">Exams, Drills &amp; Arena</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <label class="d-block cursor-pointer">
+                                <input type="radio" name="role" value="faculty" class="d-none" id="roleFaculty" onchange="updateRoleUI()">
+                                <div class="glass-panel p-3 text-center role-card-faculty" id="cardRoleFaculty" style="cursor: pointer;">
+                                    <span class="beacon-pulse beacon-faculty mb-2 d-inline-block"></span>
+                                    <i class="bi bi-speedometer2 fs-3 text-success d-block mb-1"></i>
+                                    <span class="fw-bold small d-block">Faculty / Teacher</span>
+                                    <span class="text-muted" style="font-size: 0.72rem;">Authoring &amp; Telemetry</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-gradient-primary w-100 py-3 rounded-pill fw-bold mb-3 shadow-sm d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-check-circle-fill fs-5"></i>
+                    <span>Complete Institutional Registration</span>
+                </button>
+            </form>
+
+            <div class="text-center pt-2 border-top" style="border-color: var(--card-border) !important;">
+                <p class="small text-muted mb-0">
+                    Already registered? 
+                    <a href="{{ url_for('login') }}" class="fw-bold text-primary text-decoration-none ms-1">Sign In Instead</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function updateRoleUI() {
+        const isStudent = document.getElementById('roleStudent').checked;
+        const cStudent = document.getElementById('cardRoleStudent');
+        const cFaculty = document.getElementById('cardRoleFaculty');
+        if (isStudent) {
+            cStudent.style.borderColor = 'var(--role-student-primary)';
+            cStudent.style.boxShadow = '0 0 16px var(--role-student-glow)';
+            cFaculty.style.borderColor = 'var(--neu-border)';
+            cFaculty.style.boxShadow = 'var(--neu-flat-sm)';
+        } else {
+            cFaculty.style.borderColor = 'var(--role-faculty-primary)';
+            cFaculty.style.boxShadow = '0 0 16px var(--role-faculty-glow)';
+            cStudent.style.borderColor = 'var(--neu-border)';
+            cStudent.style.boxShadow = 'var(--neu-flat-sm)';
+        }
+        if (typeof SoundFX !== 'undefined') SoundFX.select();
+    }
+    updateRoleUI();
+</script>
+{% endblock %}

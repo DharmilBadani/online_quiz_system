@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}GenAI Question Studio - QuizVerse Major Project{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11 col-xl-10">
+
+        <!-- GenAI Studio Banner -->
+        <div class="hero-card mb-4 p-4 p-md-5">
+            <div class="row align-items-center g-4">
+                <div class="col-md-8">
+                    <div class="hero-pill-badge mb-3">
+                        <span class="badge bg-warning text-dark fw-bold rounded-pill">MAJOR FEATURE</span>
+                        <span class="small fw-semibold"><i class="bi bi-stars text-warning me-1"></i> LLM GenAI &amp; Curriculum Synthesizer</span>
+                    </div>
+                    <h2 class="display-6 fw-extrabold mb-2">
+                        AI-Powered Question &amp; Syllabus Synthesizer
+                    </h2>
+                    <p class="lead opacity-90 mb-0 small" style="max-width: 620px;">
+                        Transform any engineering topic, syllabus excerpt, or technical domain into rigorous, Bloom's Taxonomy-aligned MCQs with verified correct answers and detailed explanations.
+                    </p>
+                </div>
+                <div class="col-md-4 text-center d-none d-md-block">
+                    <div class="hero-stats-box">
+                        <div class="display-6 fw-bold text-gradient mb-1">GenAI</div>
+                        <div class="small fw-bold text-uppercase text-muted">Bloom's Taxonomy Engine</div>
+                        <hr class="my-2" style="border-color: var(--card-border);">
+                        <div class="small text-muted">Zero Hallucination Multi-Choice Extraction</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Synthesis Configuration Card -->
+        <div class="quiz-card p-4 mb-4">
+            <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-sliders2 text-primary"></i> Synthesis Parameter Configuration
+            </h5>
+
+            <form action="{{ url_for('ai_generator') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="aiTopicInput" class="form-label small fw-bold text-muted text-uppercase">
+                            Domain Topic or Syllabus Prompt
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="aiTopicInput" 
+                               name="topic" 
+                               value="{{ topic|default('Artificial Intelligence') }}" 
+                               placeholder="e.g. Distributed Systems, Kubernetes, Neural Networks, Docker, Cryptography" 
+                               required>
+                        <small class="text-muted mt-1 d-block" style="font-size: 0.75rem;">
+                            Supports any engineering subject, computer science discipline, or specific framework.
+                        </small>
+                    </div>
+
+                    <div class="col-sm-6 col-md-2">
+                        <label for="aiDifficulty" class="form-label small fw-bold text-muted text-uppercase">Difficulty</label>
+                        <select class="form-select" id="aiDifficulty" name="difficulty">
+                            <option value="Easy" {% if difficulty == 'Easy' %}selected{% endif %}>Easy (Foundational)</option>
+                            <option value="Medium" {% if difficulty == 'Medium' or not difficulty %}selected{% endif %}>Medium (Core)</option>
+                            <option value="Hard" {% if difficulty == 'Hard' %}selected{% endif %}>Hard (Advanced)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-sm-6 col-md-2">
+                        <label for="aiBloom" class="form-label small fw-bold text-muted text-uppercase">Bloom's Level</label>
+                        <select class="form-select" id="aiBloom" name="bloom_level">
+                            <option value="Remembering" {% if bloom_level == 'Remembering' %}selected{% endif %}>Remembering</option>
+                            <option value="Understanding" {% if bloom_level == 'Understanding' or not bloom_level %}selected{% endif %}>Understanding</option>
+                            <option value="Applying" {% if bloom_level == 'Applying' %}selected{% endif %}>Applying</option>
+                            <option value="Analyzing" {% if bloom_level == 'Analyzing' %}selected{% endif %}>Analyzing</option>
+                        </select>
+                    </div>
+
+                    <div class="col-sm-6 col-md-2">
+                        <label for="aiCount" class="form-label small fw-bold text-muted text-uppercase">Quantity</label>
+                        <select class="form-select" id="aiCount" name="count">
+                            <option value="3" {% if count == 3 %}selected{% endif %}>3 Questions</option>
+                            <option value="5" {% if count == 5 or not count %}selected{% endif %}>5 Questions</option>
+                            <option value="10" {% if count == 10 %}selected{% endif %}>10 Questions</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 justify-content-end mt-4 pt-2 border-top" style="border-color: var(--card-border) !important;">
+                    <button type="submit" name="action" value="generate" class="btn btn-gradient-primary px-4 py-2 rounded-pill fw-bold shadow-sm">
+                        <i class="bi bi-cpu-fill me-1"></i> Synthesize Questions
+                    </button>
+                    <button type="submit" name="action" value="start_quiz" class="btn btn-primary px-4 py-2 rounded-pill fw-bold shadow">
+                        <i class="bi bi-play-circle-fill me-1"></i> Synthesize &amp; Launch Quiz
+                    </button>
+                    <button type="submit" name="action" value="save_to_db" class="neu-btn px-4 py-2 rounded-pill fw-bold text-success">
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Save to Bank
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Generated Questions Output Section -->
+        {% if generated_questions %}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-check-all text-success me-2"></i> Synthesized Questions Bank ({{ generated_questions|length }} Items)
+            </h5>
+            <span class="badge bg-primary px-3 py-2 rounded-pill font-mono">
+                Topic: {{ topic }} &bull; {{ difficulty }}
+            </span>
+        </div>
+
+        {% for q in generated_questions %}
+        <div class="quiz-card p-4 mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary text-white px-3 py-1 rounded-pill fw-bold small">
+                        Item {{ loop.index }}
+                    </span>
+                    <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 rounded-pill small">
+                        {{ q.get('bloom_level', 'Understanding') }}
+                    </span>
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 rounded-pill small">
+                        {{ q.get('difficulty', 'Medium') }}
+                    </span>
+                </div>
+                <span class="badge bg-success px-3 py-1 rounded-pill fw-bold small">
+                    Correct: Option {{ q['correct_answer'] }}
+                </span>
+            </div>
+
+            <h5 class="fw-bold mb-3 text-body">{{ q['question'] }}</h5>
+
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 {% if q['correct_answer'] == 'A' %}border border-success bg-success-subtle bg-opacity-25{% else %}neu-card shadow-none{% endif %}">
+                        <strong>A:</strong> {{ q['option_a'] }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 {% if q['correct_answer'] == 'B' %}border border-success bg-success-subtle bg-opacity-25{% else %}neu-card shadow-none{% endif %}">
+                        <strong>B:</strong> {{ q['option_b'] }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 {% if q['correct_answer'] == 'C' %}border border-success bg-success-subtle bg-opacity-25{% else %}neu-card shadow-none{% endif %}">
+                        <strong>C:</strong> {{ q['option_c'] }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 {% if q['correct_answer'] == 'D' %}border border-success bg-success-subtle bg-opacity-25{% else %}neu-card shadow-none{% endif %}">
+                        <strong>D:</strong> {{ q['option_d'] }}
+                    </div>
+                </div>
+            </div>
+
+            {% if q.get('explanation') %}
+            <div class="p-3 rounded-3 small" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                <i class="bi bi-lightbulb-fill text-warning me-1"></i>
+                <strong>Pedagogical Rationale:</strong> {{ q['explanation'] }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

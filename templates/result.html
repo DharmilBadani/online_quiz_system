@@ -1,0 +1,1025 @@
+{% extends "base.html" %}
+
+{% block title %}{{ result['topic_title'] }} Quiz Results - Online Quiz System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+        
+        <!-- Result Summary Card -->
+        <div class="result-header-card text-center mb-4">
+            <div class="mb-3">
+                {% if result['percentage'] >= 70 %}
+                    <div class="d-inline-flex p-3 rounded-circle shadow-sm" style="background: rgba(16, 185, 129, 0.15); border: 2px solid rgba(16, 185, 129, 0.4);">
+                        <i class="bi bi-trophy-fill fs-1 text-success"></i>
+                    </div>
+                {% elif result['percentage'] >= 50 %}
+                    <div class="d-inline-flex p-3 rounded-circle shadow-sm" style="background: rgba(99, 102, 241, 0.15); border: 2px solid rgba(99, 102, 241, 0.4);">
+                        <i class="bi bi-award-fill fs-1 text-primary"></i>
+                    </div>
+                {% else %}
+                    <div class="d-inline-flex p-3 rounded-circle shadow-sm" style="background: rgba(239, 68, 68, 0.15); border: 2px solid rgba(239, 68, 68, 0.4);">
+                        <i class="bi bi-shield-exclamation fs-1 text-danger"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Subject & Sub-Topic Badges -->
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mb-2">
+                <span class="badge bg-primary px-3 py-2 rounded-pill fw-semibold">
+                    <i class="bi bi-mortarboard-fill me-1"></i> {{ result.get('category_title', result.get('category', 'Quiz')) }}
+                </span>
+                {% if result.get('topic') and result['topic'] != 'All Topics' %}
+                <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2 rounded-pill fw-semibold">
+                    <i class="bi bi-bookmark-star-fill me-1"></i> {{ result['topic'] }}
+                </span>
+                {% else %}
+                <span class="badge bg-secondary-subtle text-secondary border px-3 py-2 rounded-pill fw-semibold">
+                    <i class="bi bi-collection-fill me-1"></i> Comprehensive 10-Topic Exam
+                </span>
+                {% endif %}
+            </div>
+
+            <h2 class="display-6 fw-bold mb-1">Quiz Completed!</h2>
+            <p class="text-secondary mb-2">{{ result['feedback_note'] }}</p>
+            <p class="small text-muted mb-3">
+                Candidate: <strong class="text-primary">{{ result['candidate_name'] }}</strong> &bull; Completed: {{ result['completion_date'] }}
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mb-4">
+                <span class="badge bg-{{ result['performance_badge'] }} fs-6 px-4 py-2 rounded-pill shadow-sm">
+                    {{ result['performance_label'] }}
+                </span>
+                <span class="badge bg-dark border border-secondary fs-6 px-3 py-2 rounded-pill shadow-sm">
+                    Grade: {{ result['grade'] }}
+                </span>
+                <span class="badge {% if result.get('trust_score', 100) >= 90 %}bg-success-subtle text-success border-success-subtle{% else %}bg-warning-subtle text-warning border-warning-subtle{% endif %} border fs-6 px-3 py-2 rounded-pill shadow-sm">
+                    <i class="bi bi-shield-check me-1"></i> Trust: {{ result.get('trust_score', 100) }}%
+                </span>
+            </div>
+
+            <!-- Animated SVG Circular Score Gauge with Count-Up -->
+            <div class="score-circle-wrapper my-3">
+                <svg class="score-svg" width="170" height="170" viewBox="0 0 100 100">
+                    <circle class="score-bg-circle" cx="50" cy="50" r="45"></circle>
+                    <circle class="score-progress-circle" 
+                            id="scoreProgressCircle" 
+                            cx="50" 
+                            cy="50" 
+                            r="45" 
+                            stroke="{% if result['percentage'] >= 70 %}#10b981{% elif result['percentage'] >= 50 %}#6366f1{% else %}#ef4444{% endif %}"
+                            stroke-dasharray="283" 
+                            stroke-dashoffset="283">
+                    </circle>
+                </svg>
+                <div class="score-inner-text">
+                    <div class="score-inner-percent font-mono" id="scoreCounterText">{{ result['percentage'] }}%</div>
+                    <div class="score-inner-label">{{ result['score'] }} / {{ result['total_questions'] }} Score</div>
+                </div>
+            </div>
+
+            <!-- Breakdown Stat Boxes -->
+            <div class="row g-3 justify-content-center pt-3">
+                <div class="col-6 col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-number text-primary">{{ result['total_questions'] }}</div>
+                        <div class="stat-label">Total Questions</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-number text-success">{{ result['correct_count'] }}</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-number text-danger">{{ result['incorrect_count'] }}</div>
+                        <div class="stat-label">Incorrect</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-box">
+                        <div class="stat-number text-warning">{{ result['unanswered_count'] }}</div>
+                        <div class="stat-label">Unanswered</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timing & Speed Analytics Bar -->
+            <div class="row g-2 justify-content-center mt-3 pt-3 border-top border-secondary border-opacity-25">
+                <div class="col-sm-4 text-center">
+                    <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.75rem;">Time Taken</small>
+                    <span class="fw-bold font-mono fs-6"><i class="bi bi-stopwatch text-danger me-1"></i>{{ result['formatted_duration'] }}</span>
+                </div>
+                <div class="col-sm-4 text-center">
+                    <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.75rem;">Avg Pace</small>
+                    <span class="fw-bold font-mono fs-6"><i class="bi bi-clock-history text-primary me-1"></i>{{ result['avg_time_per_q'] }}s / question</span>
+                </div>
+                <div class="col-sm-4 text-center">
+                    <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.75rem;">Speed Rating</small>
+                    <span class="badge bg-{{ result['speed_badge'] }} px-2 py-1 rounded-pill small">
+                        <i class="bi {{ result['speed_icon'] }} me-1"></i>{{ result['speed_rating'] }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-wrap justify-content-center gap-3 mt-4 pt-2">
+                {% if result.get('incorrect_count', 0) > 0 %}
+                <a href="{{ url_for('review_mistakes_quiz') }}" class="btn btn-danger btn-lg px-4 py-2 rounded-pill fw-bold shadow">
+                    <i class="bi bi-crosshair2 me-2"></i> Practice Mistakes ({{ result['incorrect_count'] }} Qs)
+                </a>
+                {% endif %}
+                <a href="{{ url_for('reset_quiz') }}" class="btn btn-primary btn-lg px-4 py-2 rounded-pill fw-bold shadow">
+                    <i class="bi bi-arrow-repeat me-2"></i> Retake {{ result['topic_title'] }}
+                </a>
+                <a href="{{ url_for('leaderboard', category=result['selected_topic']) }}" class="btn btn-dark btn-lg px-4 py-2 rounded-pill fw-bold shadow border border-secondary border-opacity-50">
+                    <i class="bi bi-trophy-fill text-warning me-2"></i> View Leaderboard
+                </a>
+                <button type="button" class="btn btn-warning btn-lg px-4 py-2 rounded-pill fw-bold text-dark shadow" onclick="printCertificate()">
+                    <i class="bi bi-printer-fill me-2"></i> Print Certificate
+                </button>
+                {% if result.get('attempt_id') %}
+                <a href="{{ url_for('export_quiz_result_json', attempt_id=result['attempt_id']) }}" target="_blank" class="btn btn-outline-success btn-lg px-4 py-2 rounded-pill fw-semibold" title="Download Verified JSON Assessment Data">
+                    <i class="bi bi-file-earmark-arrow-down-fill me-2"></i> Export JSON
+                </a>
+                {% endif %}
+                <button type="button" class="btn btn-outline-info btn-lg px-4 py-2 rounded-pill fw-semibold" onclick="copyScoreSummary()">
+                    <i class="bi bi-share-fill me-2"></i> Share Result
+                </button>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg px-4 py-2 rounded-pill fw-semibold">
+                    <i class="bi bi-grid-3x3-gap-fill me-2"></i> All Subjects
+                </a>
+            </div>
+            <div id="copyToast" class="text-success small fw-bold mt-2" style="display: none;">
+                <i class="bi bi-check-circle-fill me-1"></i> Score summary copied to clipboard!
+            </div>
+        </div>
+
+        <!-- Printable Holographic Luxury Certificate Section -->
+        <div class="certificate-container text-center my-4 mb-5" id="printableCertificate">
+            <div class="certificate-watermark">ACADEMIC HONORS</div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3 position-relative" style="z-index: 2;">
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning px-3 py-1 rounded-pill small fw-bold">
+                    Official Academic Verification
+                </span>
+                <span class="text-muted small">Date: {{ result['completion_date'] }}</span>
+            </div>
+
+            <div class="certificate-seal mb-3 position-relative" style="z-index: 2;">
+                <i class="bi bi-patch-check-fill fs-1"></i>
+            </div>
+
+            <h2 class="display-6 fw-bold text-dark text-uppercase tracking-wide mb-1 position-relative" style="z-index: 2;">Certificate of Achievement</h2>
+            <p class="text-muted small text-uppercase tracking-wider mb-4 position-relative" style="z-index: 2;">This is proudly presented to</p>
+
+            <h3 class="display-5 fw-bold text-primary mb-3 text-capitalize position-relative" style="z-index: 2;">{{ result['candidate_name'] }}</h3>
+
+            <p class="lead mx-auto text-secondary mb-4 position-relative" style="max-width: 650px; z-index: 2;">
+                for successfully demonstrating technical proficiency in the <strong>{{ result.get('category_title', result.get('category', 'Quiz')) }} Assessment</strong>
+                {% if result.get('topic') and result['topic'] != 'All Topics' %}
+                focusing specifically on <strong>{{ result['topic'] }}</strong>
+                {% else %}
+                covering comprehensive multi-topic evaluations
+                {% endif %}
+                with distinction.
+            </p>
+
+            <div class="row g-2 justify-content-center my-3 position-relative" style="max-width: 650px; margin: 0 auto; z-index: 2;">
+                <div class="col-3">
+                    <div class="border rounded p-2 bg-light">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">SUBJECT</small>
+                        <strong class="text-dark small">{{ result.get('category', 'Quiz') }}</strong>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="border rounded p-2 bg-light">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">TOPIC</small>
+                        <strong class="text-dark small" style="font-size: 0.75rem !important;">{{ result.get('topic', 'All Topics') }}</strong>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="border rounded p-2 bg-light">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">SCORE</small>
+                        <strong class="text-primary small">{{ result['score'] }} / {{ result['total_questions'] }} ({{ result['percentage'] }}%)</strong>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="border rounded p-2 bg-light">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">GRADE</small>
+                        <strong class="text-success small">{{ result['grade'] }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4 opacity-25 position-relative" style="z-index: 2;">
+
+            <div class="d-flex justify-content-between align-items-end px-4 text-muted small position-relative" style="z-index: 2;">
+                <div class="text-start">
+                    <div class="fw-bold text-dark">QuizVerse Assessment Platform</div>
+                    <div>Final Year Engineering Major Project (Capstone) &bull; Academic Track</div>
+                </div>
+                <div class="text-end">
+                    <div class="border-top pt-1 border-dark px-3 fw-bold text-dark">Academic Evaluation Seal</div>
+                    <div>Verified System Generated ID: {{ result['completion_date']|replace('-', '')|replace(' ', '') }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Revision Podcast & Audio Flashcards Studio -->
+        <div class="neu-card p-4 p-md-5 mb-5 podcast-studio-card position-relative overflow-hidden">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white" 
+                         style="width: 52px; height: 52px; background: linear-gradient(135deg, #ec4899, #8b5cf6); box-shadow: 0 4px 15px rgba(236,72,153,0.3);">
+                        <i class="bi bi-broadcast fs-4"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger text-white rounded-pill px-2 py-1 small">AI Audio Studio</span>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill small">2 Co-Hosts</span>
+                        </div>
+                        <h4 class="fw-bold mb-0 text-body">AI Revision Podcast & Audio Flashcards</h4>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="button" id="genPodcastBtn" class="btn btn-primary rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow" onclick="generateRevisionPodcast()">
+                        <i class="bi bi-mic-fill"></i> Generate 2-Min Revision Podcast
+                    </button>
+                </div>
+            </div>
+
+            <p class="text-muted small mb-4">
+                Listen to a personalized post-exam recap hosted by <strong>Dr. Elena</strong> (Professor) and <strong>Marcus</strong> (Systems Engineer), breaking down your exact quiz mistakes with engineering analogies and memory hooks.
+            </p>
+
+            <!-- Loading Spinner -->
+            <div id="podcastLoading" class="text-center py-4 d-none">
+                <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                <span class="small text-muted">Gemini is synthesizing a conversational 2-host audio episode for your missed questions...</span>
+            </div>
+
+            <!-- Podcast Player HUD -->
+            <div id="podcastPlayerHUD" class="d-none">
+                <div class="p-4 rounded-4 mb-4" style="background: var(--neu-surface); box-shadow: var(--neu-inset);">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary rounded-pill small mb-1" id="podcastEpisodeBadge">Episode 1</span>
+                            <h5 class="fw-bold text-body mb-0" id="podcastEpisodeTitle">Mastering Key Concepts</h5>
+                        </div>
+
+                        <!-- Audio Controls -->
+                        <div class="d-flex align-items-center gap-3">
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="togglePlaybackSpeed()" id="speedToggleBtn">
+                                1.0x Speed
+                            </button>
+                            <button type="button" class="btn btn-gradient-primary rounded-circle d-flex align-items-center justify-content-center shadow" 
+                                    style="width: 48px; height: 48px;" id="podcastPlayBtn" onclick="togglePodcastAudio()">
+                                <i class="bi bi-play-fill fs-4" id="playIcon"></i>
+                            </button>
+                            <button type="button" class="neu-btn btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+                                    style="width: 36px; height: 36px;" onclick="stopPodcastAudio()" title="Stop">
+                                <i class="bi bi-stop-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Host Indicators & Soundwave Visualizer -->
+                    <div class="row align-items-center g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center gap-3 p-2 rounded-3 host-box" id="hostBoxElena" style="background: rgba(99, 102, 241, 0.08);">
+                                <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold small" 
+                                     style="width: 38px; height: 38px; background: #6366f1;">E</div>
+                                <div>
+                                    <div class="fw-bold small text-body">Dr. Elena</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">Senior Professor</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <!-- Animated Soundwave equalizer -->
+                            <div class="d-inline-flex align-items-center gap-1 soundwave-container" id="soundwaveContainer" style="height: 32px;">
+                                <span class="wave-bar" style="width: 4px; height: 8px; background: #6366f1; border-radius: 2px;"></span>
+                                <span class="wave-bar" style="width: 4px; height: 16px; background: #ec4899; border-radius: 2px;"></span>
+                                <span class="wave-bar" style="width: 4px; height: 28px; background: #10b981; border-radius: 2px;"></span>
+                                <span class="wave-bar" style="width: 4px; height: 14px; background: #ec4899; border-radius: 2px;"></span>
+                                <span class="wave-bar" style="width: 4px; height: 22px; background: #6366f1; border-radius: 2px;"></span>
+                                <span class="wave-bar" style="width: 4px; height: 10px; background: #10b981; border-radius: 2px;"></span>
+                            </div>
+                            <div class="small text-muted font-mono" id="podcastStatusText" style="font-size: 0.75rem;">Paused</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center gap-3 p-2 rounded-3 host-box justify-content-md-end" id="hostBoxMarcus" style="background: rgba(16, 185, 129, 0.08);">
+                                <div class="text-md-end">
+                                    <div class="fw-bold small text-body">Marcus</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">Systems Engineer</div>
+                                </div>
+                                <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold small" 
+                                     style="width: 38px; height: 38px; background: #10b981;">M</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Synchronized Live Transcript Scrolling Window -->
+                    <div class="p-3 rounded-3 font-mono small text-body" id="podcastTranscriptBox" 
+                         style="background: rgba(0,0,0,0.06); max-height: 180px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.05); line-height: 1.6;">
+                    </div>
+                </div>
+
+                <!-- Generated Audio Flashcards Deck -->
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">
+                            <i class="bi bi-volume-up-fill text-primary me-1"></i> Audio Flashcard Takeaways
+                        </small>
+                    </div>
+                    <div class="row g-2" id="podcastFlashcardsContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Question Review Section -->
+        <div class="quiz-card p-4 p-md-5 mb-5 detailed-review-section">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h3 class="h4 fw-bold mb-1">
+                        <i class="bi bi-list-check text-primary me-2"></i> Detailed Question Review
+                    </h3>
+                    <p class="text-muted small mb-0">Topic: <strong>{{ result['topic_title'] }}</strong> &bull; Inspect and learn from answers below.</p>
+                </div>
+
+                <!-- Interactive Filter Tabs & Quick Search -->
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <div class="input-group input-group-sm" style="max-width: 220px;">
+                        <span class="input-group-text bg-transparent border-secondary border-opacity-25 text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="reviewSearchInput" class="form-control bg-transparent border-secondary border-opacity-25 text-white" 
+                               placeholder="Filter questions..." oninput="applyReviewFilters()">
+                    </div>
+
+                    <div class="d-flex gap-1 filter-tabs">
+                        <button type="button" class="filter-btn active" data-filter="all" onclick="setReviewTab('all', this)">
+                            All ({{ result['total_questions'] }})
+                        </button>
+                        <button type="button" class="filter-btn" data-filter="correct" onclick="setReviewTab('correct', this)">
+                            Correct ({{ result['correct_count'] }})
+                        </button>
+                        <button type="button" class="filter-btn" data-filter="incorrect" onclick="setReviewTab('incorrect', this)">
+                            Incorrect ({{ result['incorrect_count'] }})
+                        </button>
+                        {% if result['unanswered_count'] > 0 %}
+                            <button type="button" class="filter-btn" data-filter="unanswered" onclick="setReviewTab('unanswered', this)">
+                                Skipped ({{ result['unanswered_count'] }})
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review Items List -->
+            <div class="d-flex flex-column gap-3" id="reviewContainer">
+                {% for item in result['review_list'] %}
+                    <div class="quiz-card review-card p-3 p-md-4 {% if item['is_correct'] %}review-correct{% elif item['is_unanswered'] %}review-unanswered{% else %}review-incorrect{% endif %}"
+                         data-status="{% if item['is_correct'] %}correct{% elif item['is_unanswered'] %}unanswered{% else %}incorrect{% endif %}"
+                         data-text="{{ item['question']|lower }} {{ item['user_text']|lower }} {{ item['correct_text']|lower }}">
+                        
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-secondary font-mono px-2 py-1 small">Question {{ item['number'] }}</span>
+                                <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 rounded-pill small">
+                                    {{ item['category'] }}
+                                </span>
+                            </div>
+
+                            {% if item['is_correct'] %}
+                                <span class="badge bg-success px-3 py-2 rounded-pill">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Correct (+1)
+                                </span>
+                            {% elif item['is_unanswered'] %}
+                                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                    <i class="bi bi-dash-circle-fill me-1"></i> Unanswered (0)
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                    <i class="bi bi-x-circle-fill me-1"></i> Incorrect (0)
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <h6 class="fw-bold mb-3" style="color: var(--text-primary); line-height: 1.5;">
+                            {{ item['question'] }}
+                        </h6>
+
+                        <div class="small">
+                            <div class="mb-1">
+                                <span class="text-muted fw-semibold">Your Selection:</span>
+                                {% if item['is_unanswered'] %}
+                                    <span class="text-warning fw-bold font-mono">Not Answered</span>
+                                {% else %}
+                                    <span class="fw-bold font-mono {% if item['is_correct'] %}text-success{% else %}text-danger{% endif %}">
+                                        [{{ item['user_choice'] }}] {{ item['user_text'] }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            {% if not item['is_correct'] %}
+                                <div>
+                                    <span class="text-muted fw-semibold">Correct Answer:</span>
+                                    <span class="text-success fw-bold font-mono">
+                                        [{{ item['correct_choice'] }}] {{ item['correct_text'] }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Socratic AI Doubt Tutor Launcher -->
+                        <div class="mt-3 pt-2 d-flex flex-wrap justify-content-between align-items-center gap-2 border-top" style="border-color: var(--card-border) !important;">
+                            <button type="button" class="neu-btn btn-sm px-3 py-1 rounded-pill small d-inline-flex align-items-center gap-2 text-primary"
+                                    onclick="openSocraticTutor({{ loop.index0 }})">
+                                <i class="bi bi-stars text-warning"></i> Ask Socratic AI Tutor
+                            </button>
+                            {% if not item['is_correct'] %}
+                            <span class="small text-danger fw-semibold"><i class="bi bi-lightbulb-fill text-warning me-1"></i> Socratic Concept Breakdown</span>
+                            {% else %}
+                            <span class="small text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Concept Mastered</span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Empty filter indicator -->
+            <div id="noReviewResults" class="text-center py-4 text-muted" style="display: none;">
+                <i class="bi bi-search fs-2 mb-2 d-block"></i>
+                No matching questions found for this filter.
+            </div>
+
+            <!-- Bottom Retake Action -->
+            <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+                <a href="{{ url_for('reset_quiz') }}" class="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow">
+                    <i class="bi bi-arrow-repeat me-2"></i> Retake This Quiz
+                </a>
+            </div>
+        </div>
+
+        <!-- Socratic AI Doubt Tutor Modal (Neumorphic Soft UI) -->
+        <div class="modal fade" id="socraticTutorModal" tabindex="-1" aria-labelledby="socraticTutorLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content quiz-card border-0 p-3 p-md-4 shadow-lg" style="background: var(--neu-bg); border-radius: 28px; box-shadow: var(--neu-card-shadow);">
+                    <div class="modal-header border-0 pb-2 d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="neu-icon-box text-primary p-2 rounded-circle" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; box-shadow: var(--neu-raised); background: var(--neu-surface);">
+                                <i class="bi bi-robot fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold mb-0" id="socraticTutorLabel">Socratic AI Doubt Tutor</h5>
+                                <small class="text-muted"><i class="bi bi-stars text-warning me-1"></i>Powered by Gemini 3.5 &bull; Pedagogical Guidance</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body pt-2">
+                        <!-- Question Context Card -->
+                        <div class="p-3 rounded-4 mb-3" style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border);">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary text-white rounded-pill px-2 py-1 small" id="tutorQuestionBadge">Item #</span>
+                                <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2 py-1 small" id="tutorTopicBadge">Topic</span>
+                            </div>
+                            <div class="fw-bold mb-2 small text-body" id="tutorQuestionText">Question Prompt</div>
+                            <div class="d-flex flex-wrap gap-2 small">
+                                <div class="px-2 py-1 rounded-pill" id="tutorStudentChoiceBadge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                    Your Answer: <strong id="tutorStudentChoiceText"></strong>
+                                </div>
+                                <div class="px-2 py-1 rounded-pill" id="tutorCorrectChoiceBadge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">
+                                    Correct: <strong id="tutorCorrectChoiceText"></strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Message Thread -->
+                        <div id="tutorChatThread" class="p-3 rounded-4 mb-3" style="background: var(--neu-surface); box-shadow: var(--neu-inset); max-height: 280px; overflow-y: auto;">
+                            <!-- Conversation bubbles will be dynamically injected here -->
+                        </div>
+
+                        <!-- Quick Socratic Chips -->
+                        <div class="d-flex flex-wrap gap-2 mb-3" id="tutorQuickChips">
+                            <button type="button" class="neu-btn btn-sm px-3 py-1 rounded-pill small" onclick="quickAskTutor('Why was my chosen option incorrect?')">
+                                <i class="bi bi-question-circle me-1"></i> Why was my choice wrong?
+                            </button>
+                            <button type="button" class="neu-btn btn-sm px-3 py-1 rounded-pill small" onclick="quickAskTutor('Can you explain this with a real-world software engineering analogy?')">
+                                <i class="bi bi-lightbulb me-1"></i> Real-World Analogy
+                            </button>
+                            <button type="button" class="neu-btn btn-sm px-3 py-1 rounded-pill small" onclick="quickAskTutor('What is a memorable mental rule to never forget this concept?')">
+                                <i class="bi bi-bookmark-check me-1"></i> Memory Trick
+                            </button>
+                        </div>
+
+                        <!-- Input Box -->
+                        <div class="input-group">
+                            <input type="text" id="tutorQueryInput" class="form-control rounded-pill-start" 
+                                   placeholder="Ask the Socratic Tutor a doubt or follow-up..." 
+                                   style="background: var(--neu-surface); box-shadow: var(--neu-inset); border: var(--neu-border); color: var(--text-primary); padding: 0.65rem 1rem;"
+                                   onkeypress="if(event.key === 'Enter') sendTutorMessage();">
+                            <button class="btn btn-gradient-primary rounded-pill-end px-4 fw-bold" type="button" id="tutorSendBtn" onclick="sendTutorMessage()">
+                                <i class="bi bi-send-fill me-1"></i> Ask Tutor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const scorePct = {{ result['percentage'] }};
+    let currentStatusTab = 'all';
+
+    // Animated Count-Up Gauge
+    window.addEventListener('DOMContentLoaded', () => {
+        const circle = document.getElementById('scoreProgressCircle');
+        const counterText = document.getElementById('scoreCounterText');
+
+        if (circle) {
+            const circumference = 283;
+            const offset = circumference - (circumference * (scorePct / 100));
+            setTimeout(() => {
+                circle.style.strokeDashoffset = offset;
+            }, 250);
+        }
+
+        if (counterText) {
+            let current = 0;
+            const target = scorePct;
+            if (target === 0) {
+                counterText.textContent = '0%';
+            } else {
+                const duration = 1200;
+                const stepTime = Math.max(10, Math.floor(duration / target));
+                const timer = setInterval(() => {
+                    current++;
+                    counterText.textContent = current + '%';
+                    if (current >= target) {
+                        clearInterval(timer);
+                    }
+                }, stepTime);
+            }
+        }
+
+        // Confetti fanfare on success
+        if (scorePct >= 70 && typeof confetti === 'function') {
+            setTimeout(() => {
+                confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+            }, 300);
+            setTimeout(() => {
+                confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
+            }, 650);
+        }
+    });
+
+    function setReviewTab(tab, btn) {
+        document.querySelectorAll('.filter-tabs .filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentStatusTab = tab;
+        applyReviewFilters();
+    }
+
+    function applyReviewFilters() {
+        const query = (document.getElementById('reviewSearchInput')?.value || '').toLowerCase().trim();
+        const cards = document.querySelectorAll('.review-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const cardStatus = card.getAttribute('data-status');
+            const cardText = card.getAttribute('data-text') || '';
+
+            const matchesTab = (currentStatusTab === 'all' || cardStatus === currentStatusTab);
+            const matchesQuery = (!query || cardText.includes(query));
+
+            if (matchesTab && matchesQuery) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const noResults = document.getElementById('noReviewResults');
+        if (noResults) {
+            noResults.style.display = (visibleCount === 0) ? 'block' : 'none';
+        }
+    }
+
+    function copyScoreSummary() {
+        const text = `🎯 I scored {{ result['score'] }}/{{ result['total_questions'] }} ({{ result['percentage'] }}%) in {{ result.get('category', 'Quiz') }} - {{ result.get('topic', 'Assessment') }}!\n🏆 Grade: {{ result['grade'] }} | Speed: {{ result['formatted_duration'] }}\nTake the quiz on Online Quiz System!`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyToast();
+            }).catch(() => {
+                fallbackCopy(text);
+            });
+        } else {
+            fallbackCopy(text);
+        }
+    }
+
+    function showCopyToast() {
+        const toast = document.getElementById('copyToast');
+        if (toast) {
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            showCopyToast();
+        } catch(e) {
+            alert(text);
+        }
+        document.body.removeChild(ta);
+    }
+
+    function printCertificate() {
+        window.print();
+    }
+
+    // ==========================================
+    // SOCRATIC AI DOUBT TUTOR CLIENT CONTROLLER
+    // ==========================================
+    const reviewData = {{ result['review_list']|tojson }};
+    let currentTutorIndex = null;
+    let socraticModalInstance = null;
+
+    function openSocraticTutor(index) {
+        if (!reviewData || !reviewData[index]) return;
+        currentTutorIndex = index;
+        const item = reviewData[index];
+
+        document.getElementById('tutorQuestionBadge').textContent = `Question #${item.number || (index + 1)}`;
+        document.getElementById('tutorTopicBadge').textContent = item.category || 'Computer Science';
+        document.getElementById('tutorQuestionText').textContent = item.question;
+        
+        document.getElementById('tutorStudentChoiceText').textContent = `[${item.user_choice}] ${item.user_text || 'Not answered'}`;
+        document.getElementById('tutorCorrectChoiceText').textContent = `[${item.correct_choice}] ${item.correct_text}`;
+
+        const chatThread = document.getElementById('tutorChatThread');
+        chatThread.innerHTML = `
+            <div class="d-flex gap-2 mb-3">
+                <div class="rounded-circle p-2 text-white" style="width:34px; height:34px; background:#6366f1; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <i class="bi bi-robot font-sm"></i>
+                </div>
+                <div class="p-3 rounded-4" style="background: var(--neu-surface); box-shadow: var(--neu-raised); max-width: 85%;">
+                    <div class="small fw-bold text-primary mb-1">Socratic Professor:</div>
+                    <div class="small text-body" id="tutorInitialLoading">
+                        <span class="spinner-border spinner-border-sm me-2 text-primary" role="status"></span>
+                        Analyzing your conceptual approach and preparing Socratic guidance...
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (!socraticModalInstance) {
+            socraticModalInstance = new bootstrap.Modal(document.getElementById('socraticTutorModal'));
+        }
+        socraticModalInstance.show();
+
+        fetchInitialSocraticAdvice(item);
+    }
+
+    async function fetchInitialSocraticAdvice(item) {
+        try {
+            const resp = await fetch('/api/ai-tutor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    question: item.question,
+                    options: item.options || {},
+                    student_choice: item.user_choice,
+                    correct_choice: item.correct_choice,
+                    explanation: item.explanation || '',
+                    topic: item.category || 'General',
+                    user_query: ''
+                })
+            });
+            const data = await resp.json();
+            const loadingElem = document.getElementById('tutorInitialLoading');
+            if (loadingElem) {
+                loadingElem.innerHTML = `
+                    <p class="mb-2">${escapeHtml(data.reply || 'Let us explore this question together!')}</p>
+                    ${data.key_takeaway ? `<div class="p-2 rounded-3 small border-start border-3 border-primary bg-primary bg-opacity-10"><strong>💡 Takeaway:</strong> ${escapeHtml(data.key_takeaway)}</div>` : ''}
+                `;
+            }
+        } catch (err) {
+            console.error(err);
+            const loadingElem = document.getElementById('tutorInitialLoading');
+            if (loadingElem) {
+                loadingElem.innerHTML = `<p class="mb-0">In ${escapeHtml(item.category || 'this topic')}, remember that [${escapeHtml(item.correct_choice)}] ${escapeHtml(item.correct_text)} is the correct principle because: ${escapeHtml(item.explanation || 'it satisfies fundamental system constraints.')}</p>`;
+            }
+        }
+    }
+
+    function quickAskTutor(text) {
+        document.getElementById('tutorQueryInput').value = text;
+        sendTutorMessage();
+    }
+
+    async function sendTutorMessage() {
+        const input = document.getElementById('tutorQueryInput');
+        const query = input.value.trim();
+        if (!query || currentTutorIndex === null) return;
+        input.value = '';
+
+        const item = reviewData[currentTutorIndex];
+        const chatThread = document.getElementById('tutorChatThread');
+
+        chatThread.innerHTML += `
+            <div class="d-flex justify-content-end mb-3">
+                <div class="p-3 rounded-4 text-white" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); max-width: 80%;">
+                    <div class="small fw-semibold">${escapeHtml(query)}</div>
+                </div>
+            </div>
+        `;
+        chatThread.scrollTop = chatThread.scrollHeight;
+
+        const loadingId = 'tutor-loading-' + Date.now();
+        chatThread.innerHTML += `
+            <div class="d-flex gap-2 mb-3" id="${loadingId}">
+                <div class="rounded-circle p-2 text-white" style="width:34px; height:34px; background:#6366f1; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <i class="bi bi-robot font-sm"></i>
+                </div>
+                <div class="p-3 rounded-4" style="background: var(--neu-surface); box-shadow: var(--neu-raised); max-width: 85%;">
+                    <span class="spinner-border spinner-border-sm me-2 text-primary"></span>
+                    <span class="small text-muted">Contemplating Socratic response...</span>
+                </div>
+            </div>
+        `;
+        chatThread.scrollTop = chatThread.scrollHeight;
+
+        try {
+            const resp = await fetch('/api/ai-tutor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    question: item.question,
+                    options: item.options || {},
+                    student_choice: item.user_choice,
+                    correct_choice: item.correct_choice,
+                    explanation: item.explanation || '',
+                    topic: item.category || 'General',
+                    user_query: query
+                })
+            });
+            const data = await resp.json();
+            const loader = document.getElementById(loadingId);
+            if (loader) {
+                loader.innerHTML = `
+                    <div class="rounded-circle p-2 text-white" style="width:34px; height:34px; background:#6366f1; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <i class="bi bi-robot font-sm"></i>
+                    </div>
+                    <div class="p-3 rounded-4" style="background: var(--neu-surface); box-shadow: var(--neu-raised); max-width: 85%;">
+                        <div class="small text-body mb-2">${escapeHtml(data.reply)}</div>
+                        ${data.key_takeaway ? `<div class="p-2 rounded-3 small border-start border-3 border-primary bg-primary bg-opacity-10"><strong>💡 Takeaway:</strong> ${escapeHtml(data.key_takeaway)}</div>` : ''}
+                    </div>
+                `;
+            }
+        } catch (err) {
+            const loader = document.getElementById(loadingId);
+            if (loader) {
+                loader.innerHTML = `
+                    <div class="rounded-circle p-2 text-white" style="width:34px; height:34px; background:#6366f1; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <i class="bi bi-robot font-sm"></i>
+                    </div>
+                    <div class="p-3 rounded-4 text-danger small" style="background: var(--neu-surface); box-shadow: var(--neu-raised);">
+                        Unable to connect to AI tutor. Please check network connection.
+                    </div>
+                `;
+            }
+        }
+        chatThread.scrollTop = chatThread.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ==========================================
+    // AI AUDIO PODCAST & FLASHCARDS CONTROLLER
+    // ==========================================
+    let podcastData = null;
+    let podcastDialogueIndex = 0;
+    let isPodcastPlaying = false;
+    let podcastPlaybackRate = 1.0;
+    let synth = window.speechSynthesis;
+
+    async function generateRevisionPodcast() {
+        const btn = document.getElementById('genPodcastBtn');
+        const loader = document.getElementById('podcastLoading');
+        const playerHUD = document.getElementById('podcastPlayerHUD');
+
+        btn.disabled = true;
+        loader.classList.remove('d-none');
+
+        try {
+            const resp = await fetch('/api/podcast/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    review_items: reviewData,
+                    topic_title: "{{ result['topic_title'] }}"
+                })
+            });
+            const data = await resp.json();
+            btn.disabled = false;
+            loader.classList.add('d-none');
+
+            if (data.success) {
+                podcastData = data;
+                renderPodcastHUD(data);
+            } else {
+                alert("Unable to generate podcast episode.");
+            }
+        } catch (err) {
+            btn.disabled = false;
+            loader.classList.add('d-none');
+            alert("Error communicating with AI Audio Engine: " + err.message);
+        }
+    }
+
+    function renderPodcastHUD(data) {
+        const playerHUD = document.getElementById('podcastPlayerHUD');
+        playerHUD.classList.remove('d-none');
+        document.getElementById('podcastEpisodeTitle').textContent = data.episode_title || "Personalized Exam Revision";
+        
+        // Render Transcript
+        const tBox = document.getElementById('podcastTranscriptBox');
+        tBox.innerHTML = '';
+        (data.dialogue || []).forEach((d, idx) => {
+            const p = document.createElement('div');
+            p.className = 'mb-2 p-2 rounded-2 dialogue-line';
+            p.id = `dialogue_line_${idx}`;
+            p.style.transition = 'all 0.3s ease';
+            const isElena = d.speaker.includes('Elena');
+            p.innerHTML = `<strong class="${isElena ? 'text-primary' : 'text-success'}">[${d.speaker}]:</strong> ${escapeHtml(d.text)}`;
+            tBox.appendChild(p);
+        });
+
+        // Render Flashcards
+        const fContainer = document.getElementById('podcastFlashcardsContainer');
+        fContainer.innerHTML = '';
+        (data.audio_flashcards || []).forEach((f, idx) => {
+            const col = document.createElement('div');
+            col.className = 'col-md-6';
+            col.innerHTML = `
+                <div class="p-3 rounded-4 h-100" style="background: var(--neu-surface); box-shadow: var(--neu-raised); border: 1px solid rgba(255,255,255,0.06);">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-primary text-white rounded-pill px-2 py-1 small">Flashcard</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-circle" onclick="speakFlashcardByIndex(${idx})">
+                            <i class="bi bi-volume-up"></i>
+                        </button>
+                    </div>
+                    <div class="fw-bold small text-body mb-1">${escapeHtml(f.q)}</div>
+                    <div class="small text-muted">${escapeHtml(f.a)}</div>
+                </div>
+            `;
+            fContainer.appendChild(col);
+        });
+
+        podcastDialogueIndex = 0;
+        togglePodcastAudio();
+    }
+
+    function togglePlaybackSpeed() {
+        const btn = document.getElementById('speedToggleBtn');
+        if (podcastPlaybackRate === 1.0) {
+            podcastPlaybackRate = 1.25;
+            btn.textContent = '1.25x Speed';
+        } else if (podcastPlaybackRate === 1.25) {
+            podcastPlaybackRate = 1.5;
+            btn.textContent = '1.5x Speed';
+        } else {
+            podcastPlaybackRate = 1.0;
+            btn.textContent = '1.0x Speed';
+        }
+    }
+
+    function togglePodcastAudio() {
+        if (!podcastData || !podcastData.dialogue || !podcastData.dialogue.length) return;
+        if (isPodcastPlaying) {
+            pausePodcastAudio();
+        } else {
+            resumePodcastAudio();
+        }
+    }
+
+    function pausePodcastAudio() {
+        if (synth) synth.pause();
+        isPodcastPlaying = false;
+        document.getElementById('playIcon').className = 'bi bi-play-fill fs-4';
+        document.getElementById('podcastStatusText').textContent = 'Paused';
+        document.getElementById('soundwaveContainer').classList.remove('active-equalizer');
+    }
+
+    function resumePodcastAudio() {
+        if (synth && synth.paused) {
+            synth.resume();
+            isPodcastPlaying = true;
+            document.getElementById('playIcon').className = 'bi bi-pause-fill fs-4';
+            document.getElementById('podcastStatusText').textContent = 'Playing...';
+            document.getElementById('soundwaveContainer').classList.add('active-equalizer');
+            return;
+        }
+        playPodcastLine(podcastDialogueIndex);
+    }
+
+    function stopPodcastAudio() {
+        if (synth) synth.cancel();
+        isPodcastPlaying = false;
+        podcastDialogueIndex = 0;
+        document.getElementById('playIcon').className = 'bi bi-play-fill fs-4';
+        document.getElementById('podcastStatusText').textContent = 'Stopped';
+        document.getElementById('soundwaveContainer').classList.remove('active-equalizer');
+        document.querySelectorAll('.dialogue-line').forEach(l => l.style.backgroundColor = 'transparent');
+    }
+
+    function playPodcastLine(index) {
+        if (!podcastData || index >= podcastData.dialogue.length) {
+            stopPodcastAudio();
+            document.getElementById('podcastStatusText').textContent = 'Completed';
+            return;
+        }
+
+        podcastDialogueIndex = index;
+        const line = podcastData.dialogue[index];
+        const isElena = line.speaker.includes('Elena');
+
+        // Highlight transcript line
+        document.querySelectorAll('.dialogue-line').forEach(l => l.style.backgroundColor = 'transparent');
+        const curLineElem = document.getElementById(`dialogue_line_${index}`);
+        if (curLineElem) {
+            curLineElem.style.backgroundColor = isElena ? 'rgba(99, 102, 241, 0.15)' : 'rgba(16, 185, 129, 0.15)';
+            curLineElem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Highlight host avatar
+        document.getElementById('hostBoxElena').style.border = isElena ? '2px solid #6366f1' : 'none';
+        document.getElementById('hostBoxMarcus').style.border = !isElena ? '2px solid #10b981' : 'none';
+
+        if (!synth) return;
+        synth.cancel();
+
+        const utter = new SpeechSynthesisUtterance(line.text);
+        utter.rate = podcastPlaybackRate;
+        utter.pitch = isElena ? 1.2 : 0.85;
+
+        utter.onend = () => {
+            if (isPodcastPlaying) {
+                playPodcastLine(index + 1);
+            }
+        };
+
+        utter.onerror = () => {
+            if (isPodcastPlaying) playPodcastLine(index + 1);
+        };
+
+        synth.speak(utter);
+        isPodcastPlaying = true;
+        document.getElementById('playIcon').className = 'bi bi-pause-fill fs-4';
+        document.getElementById('podcastStatusText').textContent = `Speaking: ${line.speaker}`;
+        document.getElementById('soundwaveContainer').classList.add('active-equalizer');
+    }
+
+    function speakFlashcardByIndex(index) {
+        if (!podcastData || !podcastData.audio_flashcards || !podcastData.audio_flashcards[index]) return;
+        const card = podcastData.audio_flashcards[index];
+        speakFlashcard(card.q, card.a);
+    }
+
+    function speakFlashcard(question, answer) {
+        if (!synth) return;
+        synth.cancel();
+        const text = `Question: ${question}. Key takeaway: ${answer}`;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 1.05;
+        synth.speak(utter);
+    }
+
+</script>
+{% endblock %}
+

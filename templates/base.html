@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}QuizVerse{% endblock %} - Final Year Engineering Major Project (Capstone)</title>
+    
+    <!-- Theme Initializer (Defaulting to sleek Dark Mode, user can toggle to Light) -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('quiz_theme') || 'dark';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+        })();
+    </script>
+
+    <!-- Google Fonts: Outfit (Headings) & Plus Jakarta Sans (Body) & JetBrains Mono (Numbers/Keys) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3.3 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom Application CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3.0">
+
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+    <!-- Ambient Glowing Aurora Mesh Background -->
+    <div class="ambient-mesh" aria-hidden="true">
+        <div class="aurora-orb orb-1"></div>
+        <div class="aurora-orb orb-2"></div>
+        <div class="aurora-orb orb-3"></div>
+        <div class="aurora-grid"></div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg custom-navbar sticky-top">
+        <div class="container">
+            <div class="d-flex align-items-center gap-3">
+                <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+                    <div class="brand-icon-wrapper">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <span class="brand-title">QUIZ<span class="brand-accent">VERSE</span></span>
+                        <span class="brand-subtitle">Online Quiz System</span>
+                    </div>
+                </a>
+
+                <!-- Dynamic Role Identity Hologram Indicator -->
+                <div class="d-none d-md-flex align-items-center">
+                    {% if user_role == 'student' %}
+                    <span class="role-pill student" title="Authenticated Student Role">
+                        <span class="beacon-pulse beacon-student"></span> Student Portal
+                    </span>
+                    {% elif user_role == 'faculty' %}
+                    <span class="role-pill faculty" title="Authenticated Faculty Role">
+                        <span class="beacon-pulse beacon-faculty"></span> Faculty Studio
+                    </span>
+                    {% elif user_role == 'admin' %}
+                    <span class="role-pill admin" title="Maximum Privileges Administrator">
+                        <span class="beacon-pulse beacon-admin"></span> Admin Console
+                    </span>
+                    {% else %}
+                    <span class="role-pill guest" title="Guest Curriculum Preview">
+                        <span class="beacon-pulse" style="background: #06b6d4;"></span> Guest Portal
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2 order-lg-last">
+                <!-- Sound FX Toggle Button -->
+                <button type="button" class="glass-icon-btn" id="soundToggleBtn" title="Toggle Sound Effects" aria-label="Toggle Sound Effects">
+                    <i class="bi bi-volume-up-fill" id="soundIcon"></i>
+                </button>
+
+                <!-- Theme Toggle Button -->
+                <button type="button" class="theme-toggle-btn d-flex align-items-center gap-2" id="themeToggleBtn" aria-label="Toggle Dark/Light Mode">
+                    <i class="bi bi-sun-fill text-warning" id="themeIcon"></i>
+                    <span class="d-none d-sm-inline small fw-semibold" id="themeText">Light</span>
+                </button>
+
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#quizNavbar" aria-controls="quizNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="bi bi-list fs-2 text-body"></i>
+                </button>
+            </div>
+            
+            <div class="collapse navbar-collapse" id="quizNavbar">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link px-2" href="{{ url_for('index') }}">
+                            <i class="bi bi-house-door-fill me-1 text-primary"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-2" href="{{ url_for('leaderboard') }}">
+                            <i class="bi bi-trophy-fill text-warning me-1"></i> Leaderboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-2" href="{{ url_for('arena') }}">
+                            <i class="bi bi-controller text-danger me-1"></i> 1v1 Arena
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-2" href="{{ url_for('ai_generator') }}">
+                            <i class="bi bi-stars text-info me-1"></i> AI Studio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-2" href="{{ url_for('viva_exam') }}">
+                            <i class="bi bi-mic-fill text-danger me-1"></i> AI Viva
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-2" href="{{ url_for('code_sandbox') }}">
+                            <i class="bi bi-code-slash text-success me-1"></i> Sandbox
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-2" href="{{ url_for('syllabus_ingest') }}">
+                            <i class="bi bi-file-earmark-pdf text-danger me-1"></i> Ingest
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-2" href="{{ url_for('analytics_dashboard') }}">
+                            <i class="bi bi-graph-up-arrow text-success me-1"></i> Analytics
+                        </a>
+                    </li>
+                    {% if user_role in ['faculty', 'admin'] %}
+                    <li class="nav-item">
+                        <a class="nav-link px-2" href="{{ url_for('faculty_studio') }}">
+                            <i class="bi bi-mortarboard-fill text-primary me-1"></i> Faculty
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% if user_role == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link px-2 text-warning fw-bold" href="{{ url_for('admin_dashboard') }}">
+                            <i class="bi bi-shield-lock-fill text-warning me-1"></i> Admin
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% if is_authenticated %}
+                    <li class="nav-item dropdown ms-lg-2">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="badge rounded-circle p-2 text-white" style="background-color: {{ current_user.avatar_color|default('#4f46e5') }}; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">
+                                {{ current_user.username[0]|upper }}
+                            </span>
+                            <span class="small fw-bold">{{ current_user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 p-2" style="background: var(--neu-surface); border: var(--neu-border); border-radius: 16px;">
+                            <li>
+                                <div class="px-3 py-1 small text-muted">
+                                    Signed in as <strong class="text-primary">{{ user_role|capitalize }}</strong>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><a class="dropdown-item rounded-3" href="{{ url_for('profile') }}"><i class="bi bi-person-circle me-2"></i> My Profile</a></li>
+                            <li><a class="dropdown-item rounded-3" href="{{ url_for('student_bookmarks') }}"><i class="bi bi-bookmark-star-fill me-2 text-warning"></i> Study Vault</a></li>
+                            {% if user_role == 'admin' %}
+                            <li><a class="dropdown-item rounded-3 text-warning fw-bold" href="{{ url_for('admin_dashboard') }}"><i class="bi bi-shield-lock-fill me-2"></i> Admin Console</a></li>
+                            {% endif %}
+                            {% if user_role in ['faculty', 'admin'] %}
+                            <li><a class="dropdown-item rounded-3" href="{{ url_for('faculty_studio') }}"><i class="bi bi-speedometer2 me-2"></i> Faculty Studio</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><a class="dropdown-item rounded-3 text-danger" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-2"></i> Sign Out</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item ms-lg-2">
+                        <a class="neu-btn px-3 py-1 small" href="{{ url_for('login') }}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                        <a class="btn btn-gradient-primary btn-sm px-3 py-2 rounded-pill fw-bold shadow-sm" href="{{ url_for('quiz') }}">
+                            <i class="bi bi-lightning-charge-fill me-1"></i> Quick Quiz
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="py-4 position-relative">
+        <div class="container">
+            <!-- Flash Notification Messages -->
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert custom-glass-alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                            <div>{{ message }}</div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Dynamic Child Content -->
+            {% block content %}
+                {% if custom_content %}
+                    {{ custom_content | safe }}
+                {% endif %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- Project Footer -->
+    <footer class="custom-footer mt-auto position-relative">
+        <div class="container text-center py-4">
+            <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+                <span class="brand-title fs-5">QUIZ<span class="brand-accent">VERSE</span></span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1 small">v4.0 Major Capstone</span>
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small">Neumorphism 2.0</span>
+            </div>
+            <p class="mb-1 text-muted small">
+                Python Flask &bull; Google Gemini GenAI &bull; Pyodide WASM Code Sandbox &bull; 1v1 Battle Arena &bull; Vision Proctoring &bull; Audio Podcast Studio
+            </p>
+            <p class="mb-0 text-muted opacity-75 small">
+                Engineered for Academic Major Project Showcase &bull; Role-Based Access Control &bull; Printable Verified Certificates
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JavaScript Bundle CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <!-- Web Audio API Synthesizer (Zero External Audio Files Needed) -->
+    <script>
+        const SoundFX = {
+            enabled: localStorage.getItem('quiz_sound') !== 'false',
+            ctx: null,
+            init() {
+                if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playTone(freq, type = 'sine', duration = 0.12, gainVal = 0.08) {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    if (!this.ctx) return;
+                    if (this.ctx.state === 'suspended') this.ctx.resume();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            },
+            select() { this.playTone(520, 'sine', 0.1, 0.06); },
+            click() { this.playTone(400, 'triangle', 0.08, 0.04); },
+            submit() { 
+                this.playTone(440, 'sine', 0.1, 0.07);
+                setTimeout(() => this.playTone(660, 'sine', 0.18, 0.08), 100);
+            },
+            tick() { this.playTone(800, 'square', 0.04, 0.02); },
+            warning() {
+                this.playTone(330, 'sawtooth', 0.15, 0.05);
+                setTimeout(() => this.playTone(280, 'sawtooth', 0.2, 0.05), 150);
+            }
+        };
+
+        // Sound Toggle Button Handler
+        const soundBtn = document.getElementById('soundToggleBtn');
+        const soundIcon = document.getElementById('soundIcon');
+        function updateSoundUI() {
+            if (SoundFX.enabled) {
+                soundIcon.className = 'bi bi-volume-up-fill text-primary';
+                soundBtn.setAttribute('title', 'Sound Effects: ON (Click to mute)');
+            } else {
+                soundIcon.className = 'bi bi-volume-mute-fill text-muted';
+                soundBtn.setAttribute('title', 'Sound Effects: MUTED (Click to unmute)');
+            }
+        }
+        updateSoundUI();
+        soundBtn.addEventListener('click', () => {
+            SoundFX.enabled = !SoundFX.enabled;
+            localStorage.setItem('quiz_sound', SoundFX.enabled);
+            updateSoundUI();
+            if (SoundFX.enabled) SoundFX.playTone(580, 'sine', 0.15, 0.08);
+        });
+
+        // Theme Switcher Logic
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        function updateThemeUI(theme) {
+            if (theme === 'dark') {
+                themeIcon.className = 'bi bi-sun-fill text-warning';
+                themeText.textContent = 'Light';
+            } else {
+                themeIcon.className = 'bi bi-moon-stars-fill text-primary';
+                themeText.textContent = 'Dark';
+            }
+        }
+
+        const currentTheme = document.documentElement.getAttribute('data-bs-theme') || 'dark';
+        updateThemeUI(currentTheme);
+
+        themeToggleBtn.addEventListener('click', () => {
+            SoundFX.click();
+            const activeTheme = document.documentElement.getAttribute('data-bs-theme');
+            const newTheme = activeTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('quiz_theme', newTheme);
+            updateThemeUI(newTheme);
+        });
+    </script>
+
+    <!-- Floating Quick Action Command Dock (Hidden during proctored exam) -->
+    <aside class="floating-command-dock d-none d-sm-flex" aria-label="Quick Navigation Dock">
+        <a href="{{ url_for('index') }}" class="dock-item" title="Subject Hub (Student)"><i class="bi bi-house-door-fill text-primary"></i></a>
+        <a href="{{ url_for('quiz') }}" class="dock-item" title="Quick Assessment"><i class="bi bi-lightning-charge-fill text-warning"></i></a>
+        <a href="{{ url_for('code_sandbox') }}" class="dock-item" title="Live Code Sandbox"><i class="bi bi-code-slash text-success"></i></a>
+        <a href="{{ url_for('viva_exam') }}" class="dock-item" title="AI Oral Viva Voce"><i class="bi bi-mic-fill text-danger"></i></a>
+        <a href="{{ url_for('arena') }}" class="dock-item" title="1v1 Duel Arena"><i class="bi bi-controller text-info"></i></a>
+        <a href="{{ url_for('syllabus_ingest') }}" class="dock-item" title="Notes &amp; PDF Ingestion"><i class="bi bi-file-earmark-pdf text-danger"></i></a>
+        <a href="{{ url_for('analytics_dashboard') }}" class="dock-item" title="Cognitive Radar Analytics"><i class="bi bi-graph-up-arrow text-success"></i></a>
+        {% if user_role in ['faculty', 'admin'] %}
+        <span class="dock-divider"></span>
+        <a href="{{ url_for('faculty_studio') }}" class="dock-item" title="Faculty Authoring Studio"><i class="bi bi-speedometer2 text-success"></i></a>
+        {% endif %}
+        {% if user_role == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}" class="dock-item" title="Administrator Control Console"><i class="bi bi-shield-lock-fill text-warning"></i></a>
+        {% endif %}
+    </aside>
+
+</body>
+</html>

@@ -1,0 +1,1612 @@
+/* ==========================================================================
+   QUIZVERSE - Neumorphic (Soft UI 2.0) Major Project Design System
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Theme Variables & Neumorphic Dual-Shadow Tokens
+   -------------------------------------------------------------------------- */
+:root {
+    --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* Light Neumorphism Palette (Soft Slate Canvas) */
+    --body-bg: #e2e8f0;
+    --neu-surface: #e2e8f0;
+    --neu-surface-solid: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+
+    /* Neumorphic Shadow Calculations (Light Mode) */
+    --neu-shadow-dark: #b8c2cc;
+    --neu-shadow-light: #ffffff;
+    --neu-border: 1px solid rgba(255, 255, 255, 0.6);
+
+    --neu-flat: 8px 8px 18px var(--neu-shadow-dark), -8px -8px 18px var(--neu-shadow-light);
+    --neu-flat-sm: 4px 4px 10px var(--neu-shadow-dark), -4px -4px 10px var(--neu-shadow-light);
+    --neu-flat-hover: 12px 12px 24px var(--neu-shadow-dark), -12px -12px 24px var(--neu-shadow-light);
+    --neu-inset: inset 4px 4px 8px var(--neu-shadow-dark), inset -4px -4px 8px var(--neu-shadow-light);
+    --neu-inset-deep: inset 6px 6px 12px var(--neu-shadow-dark), inset -6px -6px 12px var(--neu-shadow-light);
+
+    /* Navbar & Card Maps */
+    --navbar-bg: rgba(226, 232, 240, 0.92);
+    --navbar-border: rgba(255, 255, 255, 0.5);
+    --card-bg: #e2e8f0;
+    --card-border: rgba(255, 255, 255, 0.6);
+    --glass-shadow: var(--neu-flat);
+    --card-shadow-hover: var(--neu-flat-hover);
+
+    /* Dynamic Brand Accents */
+    --primary-color: #4f46e5;
+    --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    --accent-cyan: #0891b2;
+    --accent-emerald: #059669;
+    --accent-amber: #d97706;
+    --accent-rose: #e11d48;
+
+    /* Quiz Option & Interaction States */
+    --option-bg: #e2e8f0;
+    --option-border: rgba(255, 255, 255, 0.5);
+    --option-hover: #e6ecf5;
+    --option-selected-bg: #e0e7ff;
+    --option-selected-border: #4f46e5;
+    --option-selected-text: #312e81;
+
+    --bubble-bg: #e2e8f0;
+    --bubble-text: #475569;
+    --bubble-border: rgba(255, 255, 255, 0.5);
+    --bubble-answered: #059669;
+
+    --aurora-1: rgba(99, 102, 241, 0.08);
+    --aurora-2: rgba(168, 85, 247, 0.06);
+    --aurora-3: rgba(6, 182, 212, 0.08);
+
+    /* Role-Adaptive Color Architecture (Light Canvas) */
+    --role-student-primary: #4f46e5;
+    --role-student-secondary: #0891b2;
+    --role-student-glow: rgba(79, 70, 229, 0.25);
+    --role-student-gradient: linear-gradient(135deg, #4f46e5 0%, #0891b2 100%);
+    --role-student-badge-bg: rgba(79, 70, 229, 0.12);
+    --role-student-badge-border: rgba(79, 70, 229, 0.3);
+
+    --role-faculty-primary: #059669;
+    --role-faculty-secondary: #0d9488;
+    --role-faculty-glow: rgba(5, 150, 105, 0.25);
+    --role-faculty-gradient: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+    --role-faculty-badge-bg: rgba(5, 150, 105, 0.12);
+    --role-faculty-badge-border: rgba(5, 150, 105, 0.3);
+
+    --role-admin-primary: #d97706;
+    --role-admin-secondary: #dc2626;
+    --role-admin-glow: rgba(217, 119, 6, 0.25);
+    --role-admin-gradient: linear-gradient(135deg, #d97706 0%, #dc2626 100%);
+    --role-admin-badge-bg: rgba(217, 119, 6, 0.12);
+    --role-admin-badge-border: rgba(217, 119, 6, 0.3);
+
+    --glass-panel-bg: rgba(255, 255, 255, 0.85);
+    --glass-panel-border: 1px solid rgba(255, 255, 255, 0.8);
+    --glass-panel-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.6);
+}
+
+[data-bs-theme="dark"] {
+    /* Dark Neumorphism Palette (Matte Obsidian Charcoal) */
+    --body-bg: #090d16;
+    --neu-surface: #121726;
+    --neu-surface-solid: #121726;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+
+    /* Neumorphic Shadow Calculations (Dark Mode) */
+    --neu-shadow-dark: rgba(4, 7, 12, 0.95);
+    --neu-shadow-light: rgba(30, 38, 58, 0.5);
+    --neu-border: 1px solid rgba(255, 255, 255, 0.08);
+
+    --neu-flat: 8px 8px 20px var(--neu-shadow-dark), -6px -6px 16px var(--neu-shadow-light);
+    --neu-flat-sm: 4px 4px 10px var(--neu-shadow-dark), -3px -3px 8px var(--neu-shadow-light);
+    --neu-flat-hover: 12px 12px 28px var(--neu-shadow-dark), -8px -8px 20px var(--neu-shadow-light);
+    --neu-inset: inset 4px 4px 8px var(--neu-shadow-dark), inset -3px -3px 8px var(--neu-shadow-light);
+    --neu-inset-deep: inset 6px 6px 12px var(--neu-shadow-dark), inset -5px -5px 10px var(--neu-shadow-light);
+
+    /* Navbar & Card Maps */
+    --navbar-bg: rgba(15, 20, 34, 0.88);
+    --navbar-border: rgba(255, 255, 255, 0.09);
+    --card-bg: #121726;
+    --card-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: var(--neu-flat);
+    --card-shadow-hover: var(--neu-flat-hover);
+
+    /* Dynamic Brand Accents */
+    --primary-color: #6366f1;
+    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    --accent-cyan: #22d3ee;
+    --accent-emerald: #34d399;
+    --accent-amber: #fbbf24;
+    --accent-rose: #fb7185;
+
+    /* Quiz Option & Interaction States */
+    --option-bg: #121726;
+    --option-border: rgba(255, 255, 255, 0.08);
+    --option-hover: #1b233a;
+    --option-selected-bg: #1a223f;
+    --option-selected-border: #6366f1;
+    --option-selected-text: #e0e7ff;
+
+    --bubble-bg: #121726;
+    --bubble-text: #94a3b8;
+    --bubble-border: rgba(255, 255, 255, 0.08);
+    --bubble-answered: #10b981;
+
+    --aurora-1: rgba(99, 102, 241, 0.18);
+    --aurora-2: rgba(168, 85, 247, 0.14);
+    --aurora-3: rgba(6, 182, 212, 0.15);
+
+    /* Role-Adaptive Color Architecture (Deep Cyber Obsidian) */
+    --role-student-primary: #6366f1;
+    --role-student-secondary: #22d3ee;
+    --role-student-glow: rgba(99, 102, 241, 0.4);
+    --role-student-gradient: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+    --role-student-badge-bg: rgba(99, 102, 241, 0.18);
+    --role-student-badge-border: rgba(99, 102, 241, 0.4);
+
+    --role-faculty-primary: #10b981;
+    --role-faculty-secondary: #14b8a6;
+    --role-faculty-glow: rgba(16, 185, 129, 0.4);
+    --role-faculty-gradient: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+    --role-faculty-badge-bg: rgba(16, 185, 129, 0.18);
+    --role-faculty-badge-border: rgba(16, 185, 129, 0.4);
+
+    --role-admin-primary: #f59e0b;
+    --role-admin-secondary: #ef4444;
+    --role-admin-glow: rgba(245, 158, 11, 0.4);
+    --role-admin-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+    --role-admin-badge-bg: rgba(245, 158, 11, 0.18);
+    --role-admin-badge-border: rgba(245, 158, 11, 0.4);
+
+    --glass-panel-bg: rgba(18, 23, 38, 0.76);
+    --glass-panel-border: 1px solid rgba(255, 255, 255, 0.08);
+    --glass-panel-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* --------------------------------------------------------------------------
+   2. Global Typography & Neumorphic Canvas Reset
+   -------------------------------------------------------------------------- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--body-bg);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    position: relative;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6, .brand-title {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+code, kbd, .font-mono, .timer-text, .score-inner-percent {
+    font-family: var(--font-mono);
+}
+
+/* --------------------------------------------------------------------------
+   3. Ambient Animated Aurora Mesh (Soft Diffused Underglow)
+   -------------------------------------------------------------------------- */
+.ambient-mesh {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.aurora-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.7;
+    animation: auroraFloat 20s ease-in-out infinite alternate;
+}
+
+.orb-1 {
+    width: 500px;
+    height: 500px;
+    background: var(--aurora-1);
+    top: -120px;
+    right: -100px;
+    animation-duration: 22s;
+}
+
+.orb-2 {
+    width: 450px;
+    height: 450px;
+    background: var(--aurora-2);
+    bottom: -80px;
+    left: -100px;
+    animation-duration: 26s;
+    animation-delay: -5s;
+}
+
+.orb-3 {
+    width: 380px;
+    height: 380px;
+    background: var(--aurora-3);
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-duration: 20s;
+    animation-delay: -10s;
+}
+
+.aurora-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+    opacity: 0.25;
+}
+
+@keyframes auroraFloat {
+    0% { transform: translate(0px, 0px) scale(1); }
+    50% { transform: translate(50px, 30px) scale(1.08); }
+    100% { transform: translate(-30px, -50px) scale(0.95); }
+}
+
+/* --------------------------------------------------------------------------
+   4. Neumorphic Navigation Bar
+   -------------------------------------------------------------------------- */
+.custom-navbar {
+    background: var(--navbar-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: var(--neu-border);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    z-index: 1030;
+}
+
+.brand-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--neu-surface);
+    box-shadow: var(--neu-flat-sm);
+    border: var(--neu-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    font-size: 1.4rem;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.navbar-brand:hover .brand-icon-wrapper {
+    transform: scale(1.08) rotate(-4deg);
+    box-shadow: var(--neu-flat);
+}
+
+.brand-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+    line-height: 1.1;
+}
+
+.brand-accent {
+    background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.brand-subtitle {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.nav-link {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--text-secondary) !important;
+    border-radius: 12px;
+    padding: 0.5rem 0.9rem !important;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    color: var(--primary-color) !important;
+    background: var(--neu-surface);
+    box-shadow: var(--neu-flat-sm);
+}
+
+.nav-link.active {
+    color: var(--primary-color) !important;
+    box-shadow: var(--neu-inset);
+    background: var(--neu-surface);
+}
+
+/* Tactile Icon Buttons */
+.glass-icon-btn, .theme-toggle-btn {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    box-shadow: var(--neu-flat-sm);
+    color: var(--text-primary);
+    border-radius: 50px;
+    padding: 0.45rem 0.95rem;
+    font-size: 0.9rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.glass-icon-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.glass-icon-btn:hover, .theme-toggle-btn:hover {
+    box-shadow: var(--neu-flat);
+    transform: translateY(-2px);
+    color: var(--primary-color);
+}
+
+.glass-icon-btn:active, .theme-toggle-btn:active {
+    box-shadow: var(--neu-inset);
+    transform: scale(0.96);
+}
+
+/* --------------------------------------------------------------------------
+   5. Neumorphic Cards & Hero Banner
+   -------------------------------------------------------------------------- */
+.quiz-card {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    border-radius: 22px;
+    box-shadow: var(--neu-flat);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.quiz-card.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--neu-flat-hover);
+}
+
+/* Tactile Embossed Hero Section */
+.hero-card {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    border-radius: 26px;
+    color: var(--text-primary);
+    box-shadow: var(--neu-flat);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-gradient);
+}
+
+.hero-pill-badge {
+    background: var(--neu-surface);
+    box-shadow: var(--neu-inset);
+    border: var(--neu-border);
+    border-radius: 50px;
+    padding: 0.4rem 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hero-stats-box {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    border-radius: 20px;
+    box-shadow: var(--neu-flat-sm);
+    padding: 1.75rem;
+    text-align: center;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-bs-theme="dark"] .text-gradient {
+    background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   6. Inset Form Controls & Tactile Buttons
+   -------------------------------------------------------------------------- */
+.form-control, .form-select, input[type="text"], input[type="password"], input[type="email"], textarea {
+    background-color: var(--neu-surface) !important;
+    border: var(--neu-border) !important;
+    border-radius: 14px !important;
+    box-shadow: var(--neu-inset) !important;
+    color: var(--text-primary) !important;
+    padding: 0.75rem 1.15rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: var(--neu-inset), 0 0 0 2px rgba(99, 102, 241, 0.4) !important;
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 0.75;
+}
+
+/* Tactile Buttons */
+.btn-gradient-primary {
+    background: var(--primary-gradient);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 14px;
+    box-shadow: var(--neu-flat-sm), 0 4px 15px rgba(99, 102, 241, 0.35);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-weight: 700;
+}
+
+.btn-gradient-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--neu-flat), 0 8px 24px rgba(99, 102, 241, 0.45);
+    filter: brightness(1.06);
+}
+
+.btn-gradient-primary:active {
+    box-shadow: var(--neu-inset);
+    transform: scale(0.98);
+}
+
+.neu-btn {
+    background: var(--neu-surface);
+    color: var(--text-primary);
+    border: var(--neu-border);
+    border-radius: 14px;
+    padding: 0.65rem 1.35rem;
+    font-weight: 600;
+    box-shadow: var(--neu-flat-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.neu-btn:hover {
+    color: var(--primary-color);
+    box-shadow: var(--neu-flat);
+    transform: translateY(-2px);
+}
+
+.neu-btn:active, .neu-btn.active {
+    box-shadow: var(--neu-inset);
+    transform: scale(0.98);
+    color: var(--primary-color);
+}
+
+/* --------------------------------------------------------------------------
+   7. Interactive Mission Control Launcher (Subject & Topic Tabs)
+   -------------------------------------------------------------------------- */
+.subject-carousel-nav {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 8px 4px 12px 4px;
+    scrollbar-width: thin;
+}
+
+.subject-carousel-nav::-webkit-scrollbar {
+    height: 5px;
+}
+
+.subject-carousel-nav::-webkit-scrollbar-thumb {
+    background: var(--neu-shadow-dark);
+    border-radius: 10px;
+}
+
+.subject-nav-pill {
+    padding: 0.65rem 1.25rem;
+    border-radius: 50px;
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    box-shadow: var(--neu-flat-sm);
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.subject-nav-pill:hover {
+    color: var(--primary-color);
+    box-shadow: var(--neu-flat);
+    transform: translateY(-2px);
+}
+
+.subject-nav-pill.active {
+    background: var(--neu-surface);
+    box-shadow: var(--neu-inset);
+    color: var(--primary-color);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.topic-drill-card {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    box-shadow: var(--neu-flat-sm);
+    border-radius: 18px;
+    padding: 1.15rem;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.topic-drill-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--neu-flat-hover);
+    border-color: var(--primary-color);
+}
+
+/* --------------------------------------------------------------------------
+   8. Gamified Neumorphic Quiz Arena UI (quiz.html)
+   -------------------------------------------------------------------------- */
+.quiz-sticky-header {
+    position: sticky;
+    top: 72px;
+    z-index: 1020;
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    box-shadow: var(--neu-flat);
+    border-radius: 20px;
+    padding: 0.95rem 1.35rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Circular Pulse Timer Badge */
+.timer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem 1.15rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    font-family: var(--font-mono);
+    background: var(--neu-surface);
+    box-shadow: var(--neu-inset);
+    border: var(--neu-border);
+    transition: all 0.3s ease;
+}
+
+.timer-normal {
+    color: var(--accent-emerald);
+}
+
+.timer-warning {
+    color: var(--accent-amber);
+    animation: timerPulse 1.2s infinite;
+}
+
+.timer-danger {
+    color: var(--accent-rose);
+    animation: heartbeat 0.8s infinite;
+}
+
+@keyframes timerPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.08); }
+    50% { transform: scale(0.98); }
+    75% { transform: scale(1.06); }
+}
+
+/* Question Bubble Matrix Navigator */
+.q-navigator {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    max-width: 100%;
+}
+
+.q-bubble {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--neu-surface);
+    box-shadow: var(--neu-flat-sm);
+    border: var(--neu-border);
+    color: var(--bubble-text);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.q-bubble:hover {
+    transform: scale(1.12);
+    box-shadow: var(--neu-flat);
+    color: var(--primary-color);
+}
+
+.q-bubble.answered {
+    background: var(--accent-emerald);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    border-color: transparent;
+}
+
+.q-bubble.active-view {
+    box-shadow: var(--neu-inset);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Question Cards & Keyboard Assisted Option Tiles */
+.question-card {
+    transition: all 0.3s ease;
+    scroll-margin-top: 175px;
+}
+
+.options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.option-label {
+    display: block;
+    cursor: pointer;
+    margin-bottom: 0;
+    user-select: none;
+}
+
+.option-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Tactile Extruded Option Tile */
+.option-tile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 1.1rem 1.4rem;
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    border-radius: 18px;
+    box-shadow: var(--neu-flat-sm);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.option-tile:hover {
+    box-shadow: var(--neu-flat);
+    transform: translateY(-2px);
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+.option-key-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--neu-surface);
+    box-shadow: var(--neu-flat-sm);
+    border: var(--neu-border);
+    color: var(--primary-color);
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.option-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.45;
+    flex: 1;
+}
+
+/* Selected Option State: Debossed / Pressed In */
+.option-label input[type="radio"]:checked + .option-tile {
+    background: var(--neu-surface);
+    box-shadow: var(--neu-inset);
+    border-color: var(--primary-color);
+}
+
+.option-label input[type="radio"]:checked + .option-tile .option-key-badge {
+    background: var(--primary-color);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.5);
+    border-color: transparent;
+}
+
+.option-label input[type="radio"]:checked + .option-tile .option-text {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* Zen / Focus Mode Dimmer */
+body.zen-mode .question-card {
+    opacity: 0.2;
+    filter: blur(2px);
+    transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+body.zen-mode .question-card.active-focus {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1.01);
+}
+
+/* --------------------------------------------------------------------------
+   9. Neumorphic Score Gauge & Result Dashboard (result.html)
+   -------------------------------------------------------------------------- */
+.score-circle-wrapper {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: var(--neu-surface);
+    box-shadow: var(--neu-flat);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-svg {
+    transform: rotate(-90deg);
+}
+
+.score-bg-circle {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.08);
+    stroke-width: 8;
+}
+
+[data-bs-theme="dark"] .score-bg-circle {
+    stroke: rgba(255, 255, 255, 0.06);
+}
+
+.score-progress-circle {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.6));
+}
+
+.score-inner-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-inner-percent {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.score-inner-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.stat-box {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    box-shadow: var(--neu-flat-sm);
+    border-radius: 18px;
+    padding: 1.25rem;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--neu-flat);
+}
+
+.stat-number {
+    font-family: var(--font-mono);
+    font-size: 1.85rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   10. Printable Certificate of Achievement
+   -------------------------------------------------------------------------- */
+.certificate-container {
+    background: #ffffff;
+    color: #1e293b;
+    border: 8px double #d97706;
+    border-radius: 20px;
+    padding: 3rem 2.5rem;
+    box-shadow: var(--neu-flat);
+    position: relative;
+    max-width: 820px;
+    margin: 2rem auto;
+    overflow: hidden;
+}
+
+.certificate-container::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1.5px solid #f59e0b;
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+.certificate-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+    font-size: 6.5rem;
+    font-weight: 900;
+    color: rgba(217, 119, 6, 0.05);
+    user-select: none;
+    pointer-events: none;
+    white-space: nowrap;
+    letter-spacing: 8px;
+}
+
+.certificate-seal {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(217, 119, 6, 0.4);
+}
+
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+    .custom-navbar, .custom-footer, .ambient-mesh, .theme-toggle-btn, .glass-icon-btn, .btn, .detailed-review-section, .quiz-sticky-header, #proctorWidget {
+        display: none !important;
+    }
+    .certificate-container {
+        border: 4px double #d97706 !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        page-break-inside: avoid;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   11. Leaderboard Podium & Filter Controls
+   -------------------------------------------------------------------------- */
+.podium-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 18px;
+    margin: 2rem 0;
+}
+
+.podium-col {
+    flex: 1;
+    max-width: 220px;
+    text-align: center;
+}
+
+.podium-card {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    box-shadow: var(--neu-flat-sm);
+    border-radius: 20px;
+    padding: 1.35rem 1rem;
+    transition: transform 0.3s ease;
+}
+
+.podium-col-1 .podium-card {
+    border-color: #f59e0b;
+    box-shadow: var(--neu-flat), 0 0 20px rgba(245, 158, 11, 0.25);
+    transform: translateY(-16px);
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    box-shadow: var(--neu-flat-sm);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-btn:hover {
+    color: var(--primary-color);
+    box-shadow: var(--neu-flat);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    box-shadow: var(--neu-inset);
+    color: var(--primary-color);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   12. Major Project Special Components: Proctoring, Studio, Arena
+   -------------------------------------------------------------------------- */
+/* AI Smart Proctoring Widget */
+.proctor-hud-card {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    border-radius: 20px;
+    box-shadow: var(--neu-flat);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.proctor-camera-preview {
+    width: 140px;
+    height: 100px;
+    border-radius: 12px;
+    background: #000000;
+    box-shadow: var(--neu-inset);
+    border: var(--neu-border);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.proctor-camera-preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+.proctor-trust-meter {
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+/* Neumorphic Tables */
+.neu-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.neu-table thead th {
+    border: none;
+    padding: 0.85rem 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.neu-table tbody tr {
+    background: var(--neu-surface);
+    box-shadow: var(--neu-flat-sm);
+    border-radius: 14px;
+    transition: transform 0.2s ease;
+}
+
+.neu-table tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--neu-flat);
+}
+
+.neu-table tbody td {
+    padding: 1rem 1.25rem;
+    border: none;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.neu-table tbody tr td:first-child {
+    border-top-left-radius: 14px;
+    border-bottom-left-radius: 14px;
+}
+
+.neu-table tbody tr td:last-child {
+    border-top-right-radius: 14px;
+    border-bottom-right-radius: 14px;
+}
+
+/* Recessed Code Preview Block */
+.neu-code-box {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    box-shadow: var(--neu-inset);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    position: relative;
+}
+
+/* Neumorphic Switch / Checkbox */
+.neu-switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+}
+
+.neu-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.neu-switch-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--neu-surface);
+    box-shadow: var(--neu-inset);
+    border: var(--neu-border);
+    transition: 0.3s;
+    border-radius: 34px;
+}
+
+.neu-switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    box-shadow: var(--neu-flat-sm);
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.neu-switch input:checked + .neu-switch-slider {
+    background-color: var(--neu-surface);
+}
+
+.neu-switch input:checked + .neu-switch-slider:before {
+    transform: translateX(24px);
+    background-color: var(--primary-color);
+}
+
+/* Footer Styling */
+.custom-footer {
+    background: var(--navbar-bg);
+    border-top: var(--neu-border);
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+/* Custom Alert Banner */
+.custom-glass-alert {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    box-shadow: var(--neu-flat-sm);
+    border-radius: 16px;
+    color: var(--text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   13. Responsive Breakpoints
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .quiz-sticky-header {
+        top: 60px;
+        padding: 0.75rem;
+    }
+    .question-card {
+        scroll-margin-top: 260px;
+    }
+    .podium-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .podium-col {
+        max-width: 100%;
+    }
+    .podium-col-1 .podium-card {
+        transform: none;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   14. Viva Voce & Soundwave Animations
+   -------------------------------------------------------------------------- */
+@keyframes waveAnimation {
+    0%, 100% { height: 8px; }
+    50% { height: 28px; }
+}
+
+.wave-bar {
+    animation: waveAnimation 1.2s ease-in-out infinite;
+}
+.wave-bar:nth-child(2) { animation-delay: 0.2s; }
+.wave-bar:nth-child(3) { animation-delay: 0.4s; }
+.wave-bar:nth-child(4) { animation-delay: 0.1s; }
+.wave-bar:nth-child(5) { animation-delay: 0.3s; }
+
+/* --------------------------------------------------------------------------
+   15. Cyber-Glassmorphism 3.0 & Role Adaptive UI Architecture
+   -------------------------------------------------------------------------- */
+
+/* Live Animated Beacon Dots */
+.beacon-pulse {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: relative;
+    vertical-align: middle;
+}
+
+.beacon-pulse::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    animation: beaconRadar 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    opacity: 0.75;
+}
+
+.beacon-student { background-color: var(--role-student-primary); }
+.beacon-student::after { border: 2px solid var(--role-student-primary); }
+
+.beacon-faculty { background-color: var(--role-faculty-primary); }
+.beacon-faculty::after { border: 2px solid var(--role-faculty-primary); }
+
+.beacon-admin { background-color: var(--role-admin-primary); }
+.beacon-admin::after { border: 2px solid var(--role-admin-primary); }
+
+.beacon-danger { background-color: #ef4444; }
+.beacon-danger::after { border: 2px solid #ef4444; }
+
+.beacon-live { background-color: #10b981; }
+.beacon-live::after { border: 2px solid #10b981; }
+
+@keyframes beaconRadar {
+    0% { transform: scale(1); opacity: 0.9; }
+    100% { transform: scale(2.6); opacity: 0; }
+}
+
+/* Role Identity Hologram Pill Badges */
+.role-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 50px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    transition: all 0.25s ease;
+}
+
+.role-pill.student {
+    background: var(--role-student-badge-bg);
+    border: 1px solid var(--role-student-badge-border);
+    color: var(--role-student-primary);
+    box-shadow: 0 0 14px -2px var(--role-student-glow);
+}
+
+.role-pill.faculty {
+    background: var(--role-faculty-badge-bg);
+    border: 1px solid var(--role-faculty-badge-border);
+    color: var(--role-faculty-primary);
+    box-shadow: 0 0 14px -2px var(--role-faculty-glow);
+}
+
+.role-pill.admin {
+    background: var(--role-admin-badge-bg);
+    border: 1px solid var(--role-admin-badge-border);
+    color: var(--role-admin-primary);
+    box-shadow: 0 0 14px -2px var(--role-admin-glow);
+}
+
+.role-pill.guest {
+    background: rgba(6, 182, 212, 0.12);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    color: #06b6d4;
+}
+
+/* Cyber-Glassmorphism Surface Panels */
+.glass-panel {
+    background: var(--glass-panel-bg);
+    border: var(--glass-panel-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: var(--glass-panel-shadow);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-panel-elevated {
+    background: var(--glass-panel-bg);
+    border: var(--glass-panel-border);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-card-interactive {
+    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.glass-card-interactive:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 18px 38px -10px rgba(0, 0, 0, 0.6);
+}
+
+/* Role-Specific Hero Header Cards */
+.hero-card.hero-student::before {
+    background: var(--role-student-gradient);
+    height: 4px;
+}
+
+.hero-card.hero-faculty::before {
+    background: var(--role-faculty-gradient);
+    height: 4px;
+}
+
+.hero-card.hero-admin::before {
+    background: var(--role-admin-gradient);
+    height: 4px;
+}
+
+/* Role Glow Card Highlights */
+.role-card-student:hover {
+    border-color: rgba(99, 102, 241, 0.5) !important;
+    box-shadow: 0 14px 34px -8px var(--role-student-glow) !important;
+}
+
+.role-card-faculty:hover {
+    border-color: rgba(16, 185, 129, 0.5) !important;
+    box-shadow: 0 14px 34px -8px var(--role-faculty-glow) !important;
+}
+
+.role-card-admin:hover {
+    border-color: rgba(245, 158, 11, 0.5) !important;
+    box-shadow: 0 14px 34px -8px var(--role-admin-glow) !important;
+}
+
+/* Industrial KPI Telemetry Metric Card */
+.kpi-metric-card {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    border-radius: 20px;
+    padding: 1.35rem 1.25rem;
+    box-shadow: var(--neu-flat-sm);
+    display: flex;
+    align-items: center;
+    gap: 1.15rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--neu-flat);
+}
+
+.kpi-orb {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.kpi-metric-card:hover .kpi-orb {
+    transform: scale(1.1) rotate(4deg);
+}
+
+.kpi-orb-student {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--role-student-primary);
+    box-shadow: 0 0 16px -2px var(--role-student-glow);
+}
+
+.kpi-orb-faculty {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--role-faculty-primary);
+    box-shadow: 0 0 16px -2px var(--role-faculty-glow);
+}
+
+.kpi-orb-admin {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--role-admin-primary);
+    box-shadow: 0 0 16px -2px var(--role-admin-glow);
+}
+
+.kpi-orb-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    box-shadow: 0 0 16px -2px rgba(239, 68, 68, 0.3);
+}
+
+.kpi-orb-cyan {
+    background: rgba(6, 182, 212, 0.15);
+    color: #06b6d4;
+    box-shadow: 0 0 16px -2px rgba(6, 182, 212, 0.3);
+}
+
+.kpi-value {
+    font-family: var(--font-heading);
+    font-size: 1.85rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+}
+
+.kpi-title {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+}
+
+.kpi-desc {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* Floating Quick Action Command Dock */
+.floating-command-dock {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1040;
+    background: var(--navbar-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: var(--neu-border);
+    border-radius: 50px;
+    padding: 0.45rem 0.75rem;
+    box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.floating-command-dock:hover {
+    box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.14);
+    transform: translateX(-50%) translateY(-2px);
+}
+
+.dock-item {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 1.05rem;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.dock-item:hover {
+    color: var(--primary-color);
+    background: var(--neu-surface);
+    box-shadow: var(--neu-flat-sm);
+    transform: translateY(-3px) scale(1.12);
+}
+
+.dock-item.active {
+    color: #ffffff;
+    background: var(--primary-gradient);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.5);
+}
+
+.dock-divider {
+    width: 1px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 0 0.25rem;
+}
+
+/* Monospace Syntax Monitor for Faculty Preview */
+.syntax-monitor {
+    background: #0b0f19;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.syntax-monitor-bar {
+    background: #111728;
+    padding: 0.45rem 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.monitor-dots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.monitor-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+.monitor-dot.red { background: #ef4444; }
+.monitor-dot.yellow { background: #f59e0b; }
+.monitor-dot.green { background: #10b981; }
+
+.syntax-monitor-body {
+    padding: 1rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    color: #e2e8f0;
+    line-height: 1.6;
+}
+
+/* Fast-Pass Role Selector Pill Buttons */
+.role-fastpass-card {
+    background: var(--neu-surface);
+    border: var(--neu-border);
+    border-radius: 16px;
+    padding: 0.85rem 1.15rem;
+    box-shadow: var(--neu-flat-sm);
+    transition: all 0.25s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.role-fastpass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--neu-flat);
+    text-decoration: none;
+}
+
+.role-fastpass-card.student-pass:hover {
+    border-color: var(--role-student-primary);
+    box-shadow: 0 8px 24px -4px var(--role-student-glow);
+}
+
+.role-fastpass-card.faculty-pass:hover {
+    border-color: var(--role-faculty-primary);
+    box-shadow: 0 8px 24px -4px var(--role-faculty-glow);
+}
+
+.role-fastpass-card.admin-pass:hover {
+    border-color: var(--role-admin-primary);
+    box-shadow: 0 8px 24px -4px var(--role-admin-glow);
+}
+
+/* Hide Dock during Exam to maintain proctor HUD focus */
+body.in-exam .floating-command-dock {
+    display: none !important;
+}
+
+@media (max-width: 991px) {
+    .floating-command-dock {
+        bottom: 12px;
+        padding: 0.35rem 0.5rem;
+        gap: 0.2rem;
+    }
+    .dock-item {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+    }
+}
+
