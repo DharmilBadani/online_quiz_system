@@ -1,17 +1,12 @@
 # =============================================================================
-# QUIZVERSE MAJOR PROJECT - Production & Testing Dependencies
+# QUIZVERSE - Production Dependencies
 # =============================================================================
-# Target Environment: Python 3.10 / 3.11 / 3.12 on Windows / Linux / macOS
-# All packages verified compatible with standard library sqlite3 and asyncio.
+# Target: Python 3.10 / 3.11 / 3.12 (Linux / Windows / macOS)
 # =============================================================================
 
-# --- Runtime Core Dependencies ---
 Flask==3.0.3
 Werkzeug==3.0.3
 requests==2.34.2
 python-dotenv==1.0.1
 pypdf==6.14.2
-
-# --- Automated Testing & Quality Assurance ---
-pytest==8.2.2
-pytest-flask==1.3.0
+gunicorn==22.0.0

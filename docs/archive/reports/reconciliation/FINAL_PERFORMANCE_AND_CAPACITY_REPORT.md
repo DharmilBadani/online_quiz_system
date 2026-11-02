@@ -76,3 +76,4 @@ The load test harness executed complete student journeys rather than artificial 
 
 > [!NOTE]
 > For institutional cohorts exceeding 100 simultaneous examinees, staggered examination start times (e.g., 5-minute intake windows) are recommended until local institutional staging benchmarks have been completed on the target hardware.
+

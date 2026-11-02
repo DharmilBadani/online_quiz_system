@@ -57,3 +57,4 @@ Development archives historically shared outside version control contained a loc
 
 > [!WARNING]
 > **Definitive Proctoring Boundary:** In compliance with honest engineering disclosure, browser-based telemetry can detect browser window blur, tab switching, and fullscreen exits via JavaScript event listeners. It **cannot** reliably detect second monitors, virtual machines, physical textbooks, mobile phones, or operating-system-level shortcuts. For high-stakes institutional examinations, physical invigilation or dedicated lockdown browser software (e.g., Safe Exam Browser) is required.
+

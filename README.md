@@ -204,11 +204,13 @@ Copy-Item .env.example .env
 # 5. Initialize or migrate database safely (idempotent, never drops data)
 python database/init_db.py
 
-# 6. Run the complete automated test suite (33 tests, 100% passing)
-python -m pytest test_app.py test_major_features.py test_security_and_hardening.py -v -p no:cacheprovider
+# 6. Run the complete automated test suite (64 tests, 100% passing)
+python -m pytest tests/ -v
 
 # 7. Start the application
 python app.py
+# or using WSGI runner:
+# python wsgi.py
 ```
 
 ### Alternative Setup in Windows Command Prompt (CMD)
@@ -220,9 +222,20 @@ call venv\Scripts\activate.bat
 pip install -r requirements.txt
 copy .env.example .env
 python database\init_db.py
-python -m pytest test_app.py test_major_features.py test_security_and_hardening.py -v -p no:cacheprovider
+python -m pytest tests\ -v
 python app.py
 ```
 
 Open **`http://127.0.0.1:5000`** in your browser to access QuizVerse.
+
+---
+
+## 8. Documentation Reference
+
+- **[Architecture & Database Schema](docs/ARCHITECTURE.md)**: System components, WAL concurrency, and table models.
+- **[Deployment & Operations Runbook](docs/DEPLOYMENT_RUNBOOK.md)**: Gunicorn `gthread`, systemd units, Nginx edge rate limiting, TLS.
+- **[Security & Compliance Guide](docs/SECURITY_GUIDE.md)**: ProxyFix, proctoring telemetry, IDOR, and CSRF protections.
+- **[Backup & Disaster Recovery Guide](docs/BACKUP_AND_RECOVERY.md)**: Online hot backups, tier-isolated retention, restore drill.
+- **[API Reference](docs/API_REFERENCE.md)**: JSON endpoints for exams, proctoring, AI tutoring, and diagnostics.
+
 

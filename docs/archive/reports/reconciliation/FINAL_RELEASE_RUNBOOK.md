@@ -278,3 +278,4 @@ sudo unzip QuizVerse_Previous_Release.zip -d /var/www/quizverse
 sudo systemctl start quizverse
 curl -s http://127.0.0.1/api/admin/health
 ```
+

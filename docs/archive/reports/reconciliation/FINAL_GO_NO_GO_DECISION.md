@@ -56,3 +56,4 @@ In strict adherence to independent auditing standards, every production gate is 
    - Institutional admin must run `python database/init_db.py` to create a fresh, clean database.
    - Institutional admin must verify `FLASK_ENV=production` and `ALLOW_DEMO_LOGINS=false`.
 4. **Disaster Recovery Notice:** Local backups provide an RPO of 15 minutes and RTO < 2 seconds. Offsite disaster recovery requires institutional IT to configure an automated S3 or remote sync daemon.
+

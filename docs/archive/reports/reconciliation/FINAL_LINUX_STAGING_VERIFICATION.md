@@ -163,3 +163,4 @@ server {
 ## 5. Linux Staging Verification Gate Status
 - **Status:** **NOT VERIFIED (ENVIRONMENT UNAVAILABLE)**
 - **Prerequisite for Full Institutional Go-Live:** The deploying system administrator must execute Section 2 and Section 3 on the target Ubuntu/Debian server and verify successful socket startup, HTTP 200 response on `/api/admin/health`, and reboot survival.
+

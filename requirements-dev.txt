@@ -1,0 +1,8 @@
+# =============================================================================
+# QUIZVERSE - Development, Testing & Benchmarking Dependencies
+# =============================================================================
+-r requirements.txt
+
+pytest==8.2.2
+pytest-flask==1.3.0
+psutil==5.9.8
