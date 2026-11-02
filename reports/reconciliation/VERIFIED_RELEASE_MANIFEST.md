@@ -2,9 +2,12 @@
 **Product Name:** QuizVerse Institutional Online Examination Platform  
 **Target Release:** v2.0.0 Institutional Production Release Candidate  
 **Build Timestamp:** 2026-11-02 15:05:00 UTC+05:30  
-**Authoritative Git Commit SHA:** `b816aa126e21dd5e04a310347068eda18d8238d9`  
+**Authoritative Git Commit SHA:** `e7dc900d8ca7f2d4c38c0d09c7ad8d22ab3176e3`  
 **Git Release Tag:** `v2.0.0-institutional-prod`  
 **Release Artifact Filename:** `dist/FINAL_RELEASE_ARTIFACT.zip`  
+**Release Artifact SHA-256:** `2592a9169ca14b56404904edaf64f64366856655ec984b3abc59096453f7e08b`  
+**Evidence Bundle Filename:** `dist/FINAL_EVIDENCE_BUNDLE.zip`  
+**Evidence Bundle SHA-256:** `a7b65c80a8e4adcbc5ba64be1d5261270532a3d1e6fe19aac618e3efc37cbf98`  
 **Automated QA Execution ID:** `task-1605` (64 / 64 Tests Passed, 100% Pass Rate)  
 
 ---
