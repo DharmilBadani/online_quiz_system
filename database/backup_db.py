@@ -155,7 +155,7 @@ def list_backups(dest_dir: str = BACKUP_DIR, tier: str = None):
 
 def main():
     parser = argparse.ArgumentParser(description="QuizVerse SQLite Enterprise Backup & Recovery Utility")
-    parser.add_argument("action", nargs="?", default="backup", choices=["backup", "restore", "list"], help="Action to perform (default: backup)")
+    parser.add_argument("action", nargs="?", default="backup", choices=["backup", "create", "restore", "list", "prune"], help="Action to perform (default: backup)")
     parser.add_argument("path", nargs="?", default=None, help="Path to backup file (required for restore)")
     parser.add_argument("--dest", default=BACKUP_DIR, help=f"Destination directory for backups (default: {BACKUP_DIR})")
     parser.add_argument("--tier", choices=["daily", "exam_window", "manual"], default=None, help="Backup storage tier (sub-directory under BACKUP_DIR)")
@@ -163,8 +163,12 @@ def main():
 
     args = parser.parse_args()
 
-    if args.action == "backup":
+    if args.action in ("backup", "create"):
         create_backup(dest_dir=args.dest, keep=args.keep, tier=args.tier)
+    elif args.action == "prune":
+        target_dir = os.path.join(args.dest, args.tier) if args.tier else args.dest
+        pruned = prune_old_backups(dest_dir=target_dir, keep=args.keep or 10)
+        print(f"[SUCCESS] Pruned {pruned} snapshots exceeding retention in {target_dir}")
     elif args.action == "restore":
         if not args.path:
             print("[ERROR] Please provide the path to the backup file to restore: python backup_db.py restore <backup_path>")
