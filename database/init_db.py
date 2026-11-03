@@ -51,7 +51,47 @@ def init_database():
     connection.execute("PRAGMA journal_mode = WAL;")
     cursor = connection.cursor()
 
-    # Ensure questions table exists for dynamic storage and backward compatibility
+    # 1. Primary Users table for RBAC (Must exist first for Foreign Key referential integrity)
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE,
+            password_hash TEXT NOT NULL,
+            role TEXT DEFAULT 'student',
+            full_name TEXT,
+            avatar_color TEXT DEFAULT '#4f46e5',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)")
+
+    # Seed default Major Project role accounts
+    default_users = [
+        ("student", "student@university.edu", generate_password_hash("student123"), "student", "Alex Student", "#6366f1"),
+        ("faculty", "faculty@university.edu", generate_password_hash("faculty123"), "faculty", "Prof. Vikram Sharma", "#10b981"),
+        ("admin", "admin@university.edu", generate_password_hash("admin123"), "admin", "System Administrator", "#f59e0b")
+    ]
+    for uname, email, phash, role, fname, color in default_users:
+        cursor.execute("SELECT id, role FROM users WHERE username = ?", (uname,))
+        row = cursor.fetchone()
+        if not row:
+            cursor.execute(
+                """
+                INSERT INTO users (username, email, password_hash, role, full_name, avatar_color)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (uname, email, phash, role, fname, color)
+            )
+            print(f"Created default user: {uname} ({role})")
+        elif uname == "admin" and row[1] != "admin":
+            cursor.execute("UPDATE users SET role = 'admin' WHERE username = 'admin'")
+            print("Restored default admin account role integrity.")
+
+    # 2. Questions table for dynamic storage and backward compatibility
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS questions (
@@ -95,14 +135,16 @@ def init_database():
                 trust_score INTEGER DEFAULT 100,
                 cheat_flags INTEGER DEFAULT 0,
                 user_id INTEGER,
+                attempt_token TEXT,
+                review_data TEXT,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
             )
             """
         )
         cursor.executemany(
             """
-            INSERT INTO quiz_attempts (candidate_name, category, topic, score, total_questions, percentage, grade, time_taken_seconds, speed_rating, trust_score, cheat_flags, user_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 100, 0, NULL)
+            INSERT INTO quiz_attempts (candidate_name, category, topic, score, total_questions, percentage, grade, time_taken_seconds, speed_rating, trust_score, cheat_flags, user_id, attempt_token, review_data)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 100, 0, NULL, NULL, NULL)
             """,
             SAMPLE_ATTEMPTS
         )
@@ -203,44 +245,6 @@ def init_database():
         cursor.execute("ALTER TABLE questions ADD COLUMN bloom_level TEXT DEFAULT 'Understanding'")
     if "explanation" not in existing_q_cols:
         cursor.execute("ALTER TABLE questions ADD COLUMN explanation TEXT")
-
-    # Major Project Additions: Users table for Role-Based Access Control (RBAC)
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE,
-            password_hash TEXT NOT NULL,
-            role TEXT DEFAULT 'student',
-            full_name TEXT,
-            avatar_color TEXT DEFAULT '#4f46e5',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-        """
-    )
-
-    # Seed default Major Project role accounts
-    default_users = [
-        ("student", "student@university.edu", generate_password_hash("student123"), "student", "Alex Student", "#6366f1"),
-        ("faculty", "faculty@university.edu", generate_password_hash("faculty123"), "faculty", "Prof. Vikram Sharma", "#10b981"),
-        ("admin", "admin@university.edu", generate_password_hash("admin123"), "admin", "System Administrator", "#f59e0b")
-    ]
-    for uname, email, phash, role, fname, color in default_users:
-        cursor.execute("SELECT id, role FROM users WHERE username = ?", (uname,))
-        row = cursor.fetchone()
-        if not row:
-            cursor.execute(
-                """
-                INSERT INTO users (username, email, password_hash, role, full_name, avatar_color)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (uname, email, phash, role, fname, color)
-            )
-            print(f"Created default user: {uname} ({role})")
-        elif uname == "admin" and row[1] != "admin":
-            cursor.execute("UPDATE users SET role = 'admin' WHERE username = 'admin'")
-            print("Restored default admin account role integrity.")
 
     # Major Project Additions: Proctoring Violations Telemetry Table
     cursor.execute(
