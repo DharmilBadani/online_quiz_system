@@ -66,31 +66,27 @@ except ImportError:
 # Flask Application Initialization & Security Configuration
 app = Flask(__name__)
 
-# Strict Production Secret Validation
+# Strict Production Secret Validation with Zero-Config Cloud Auto-Generation
 def validate_production_config() -> str:
     """
     Validates enterprise security configuration at application startup.
-    Fails fast in production if mandatory security parameters or strong secrets are missing.
+    If no secret key is provided, automatically generates a cryptographically
+    secure 256-bit random secret key at runtime so the app can be deployed
+    on cloud platforms (like Render) with ZERO mandatory environment variables.
     """
-    flask_env = os.environ.get("FLASK_ENV", "development").lower()
-    is_prod = (flask_env == "production")
-    
     secret = os.environ.get("FLASK_SECRET_KEY") or os.environ.get("SECRET_KEY")
     insecure_fallbacks = {
         "academic_quiz_system_secret_key_2026",
-        "quizverse_major_secret_key_2026_neumorphic",
         "default_secret_key",
         "secret",
         "change_this_to_a_secure_random_64_character_hex_string"
     }
     
-    if is_prod:
-        if not secret:
-            raise RuntimeError("CRITICAL CONFIGURATION ERROR: FLASK_SECRET_KEY environment variable is required in production mode.")
-        if secret in insecure_fallbacks or len(secret) < 32:
-            raise RuntimeError("CRITICAL CONFIGURATION ERROR: Insecure or default FLASK_SECRET_KEY detected in production. Generate a strong key via secrets.token_hex(32).")
+    if not secret or secret in insecure_fallbacks or len(secret) < 32:
+        # Dynamically generate a cryptographically strong 256-bit key
+        secret = secrets.token_hex(32)
     
-    return secret or "quizverse_major_secret_key_2026_neumorphic"
+    return secret
 
 app.secret_key = validate_production_config()
 
